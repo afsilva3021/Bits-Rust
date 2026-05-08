@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teclado virtual</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #111827;
+            --surface: #1f2937;
+            --surface-strong: #273449;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(148, 163, 184, 0.26);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: var(--text);
+            background: rgba(15, 23, 42, 0.96);
+        }
+
+        .keyboard-modal {
+            min-height: 100vh;
+            padding: 18px;
+            background: linear-gradient(180deg, rgba(31, 41, 55, 0.98), rgba(15, 23, 42, 0.98));
+            border: 1px solid var(--border);
+        }
+
+        .keyboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .keyboard-hint {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .typed-preview {
+            width: 100%;
+            min-height: 46px;
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            overflow: hidden;
+            color: var(--text);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 18px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .keyboard {
+            display: grid;
+            gap: 8px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .key {
+            min-width: 48px;
+            min-height: 44px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .key.wide {
+            min-width: 100px;
+            font-size: 15px;
+        }
+
+        .key.selected {
+            color: #06121f;
+            background: var(--accent);
+            border-color: #7dd3fc;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.28);
+        }
+    </style>
+</head>
+
+<body>
+    <main class="keyboard-modal">
+        <div class="keyboard-header">
+            <h1>Teclado virtual</h1>
+            <div class="keyboard-hint">A seleciona | B fecha | X apaga | RB/LB maiuscula</div>
+        </div>
+        <div class="typed-preview" id="typedPreview"></div>
+        <div class="keyboard" id="keyboard"></div>
+    </main>
+
+    <script>
+        const keyboard = document.getElementById('keyboard');
+        const typedPreview = document.getElementById('typedPreview');
+
+        window.updateKeyboardState = function updateKeyboardState(state) {
+            typedPreview.textContent = state.text || '';
+            keyboard.innerHTML = '';
+
+            state.rows.forEach((row) => {
+                const rowElement = document.createElement('div');
+                rowElement.className = 'keyboard-row';
+
+                row.forEach((key) => {
+                    const item = document.createElement('div');
+                    item.className = `key${key.wide ? ' wide' : ''}${key.selected ? ' selected' : ''}`;
+                    item.textContent = key.label;
+                    rowElement.appendChild(item);
+                });
+
+                keyboard.appendChild(rowElement);
+            });
+        };
+    </script>
+</body>
+
+</html>

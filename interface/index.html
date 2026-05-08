@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bit&Rust</title>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="./src/css/style.css">
+</head>
+
+<body>
+    <div class="intro-screen" id="introScreen" aria-label="Abertura do launcher">
+        <video id="introVideo" class="intro-video" autoplay playsinline preload="auto">
+            <source src="./src/medias/Remova_o_nome_projeto_delta_e.webm" type="video/webm">
+            <source src="./src/medias/Remova_o_nome_projeto_delta_e.mp4" type="video/mp4">
+        </video>
+        <button class="intro-skip" id="introSkip" type="button" aria-label="Pular abertura">
+            <span class="controller-badge">A</span>
+            <span>Pular</span>
+        </button>
+    </div>
+
+    <section class="profile-selection-screen d-none" id="profileSelectionScreen" aria-label="Escolher perfil">
+        <div class="profile-selection-panel">
+            <div class="profile-selection-header">
+                <div>
+                    <span class="section-kicker">Perfil</span>
+                    <h1>Quem vai jogar?</h1>
+                </div>
+            </div>
+            <div class="profile-selection-grid" id="profileSelectionGrid"></div>
+        </div>
+    </section>
+
+    <nav class="navbar fixed-top app-navbar">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <button class="navbar-toggler border-0 icon-button" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#sidebar" aria-label="Abrir menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand m-0 fw-bold d-flex align-items-center" href="#">
+                <i class="bi bi-grid-3x3-gap-fill me-2"></i>Bit&amp;Rust
+            </a>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">
+                    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                </button>
+                <button class="btn btn-primary app-action-btn fw-bold">
+                    <i class="bi bi-house-fill me-2"></i>Menu Home
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold text-primary">Menu Principal</h5>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item"><a class="nav-link active" href="./webapp.html"><i class="bi bi-house-door me-2"></i>Web App</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="#" data-sidebar-action="games"><i class="bi bi-controller me-2"></i>Meus Jogos</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="./users.html"><i class="bi bi-people me-2"></i>Usuários</a></li>
+            </ul>
+
+            <div class="sidebar-utility-actions">
+                <a class="nav-link sidebar-settings-link" href="./settings.html">
+                    <i class="bi bi-gear"></i>
+                    <span>Configurações</span>
+                </a>
+                <hr>
+                <a class="nav-link sidebar-settings-link" href="#" id="restartSystem">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>Reiniciar</span>
+                </a>
+                <hr>
+                <a class="nav-link sidebar-settings-link text-danger p-2" href="#" id="shutdownSystem">
+                    <i class="bi bi-power"></i>
+                    <span>Desligar</span>
+                </a>
+                <hr>
+            </div>
+
+            <div class="user-section mt-auto">
+                <div class="dropup">
+                    <a href="#" class="user-link d-flex align-items-center text-decoration-none dropdown-toggle"
+                        data-bs-toggle="dropdown">
+                        <div class="position-relative me-3">
+                            <img src="./src/img/perfil/avatargamer0.jpg" alt="User" class="user-avatar rounded-circle">
+                            <span
+                                class="position-absolute bottom-0 start-100 translate-middle p-2 bg-success border border-white rounded-circle"></span>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <strong class="lh-1 text-primary" id="user"><i class="bi bi-controller"></i> Selecione perfil</strong>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-start shadow mb-3 border-0 rounded-4">
+                        <li><a class="dropdown-item py-2" href="#" id="openProfileAchievements"><i class="bi bi-trophy me-2"></i>Perfil</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-danger py-2" href="#" id="exitLauncher">Sair</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container-fluid px-3 py-3">
+        <section class="library-header mb-3">
+            <div>
+                <span class="section-kicker">Biblioteca</span>
+                <h1>Escolha seu próximo jogo</h1>
+            </div>
+            <div class="library-actions">
+                <button class="btn btn-primary steam-add-button" id="openAddEmulatorModal" type="button">
+                    <i class="bi bi-cpu me-2"></i>Adicionar emulador
+                </button>
+                <button class="btn btn-primary steam-add-button" id="importSteamLibraryButton" type="button">
+                    <i class="bi bi-steam me-2"></i>Importar Steam
+                </button>
+                <button class="btn btn-outline-light steam-add-button" id="openAddLutrisModal" type="button">
+                    <i class="bi bi-plus-circle me-2"></i>Adicionar games
+                </button>
+                <button class="btn btn-primary steam-add-button" id="openAddSteamModal" type="button">
+                    <i class="bi bi-plus-circle me-2"></i>Adicionar jogo
+                </button>
+                <div class="library-stats">
+                    <span id="libraryGameCount">12 jogos</span>
+                    <i class="bi bi-controller"></i>
+                </div>
+            </div>
+        </section>
+
+        <section class="category-filter-bar mb-4 pt-3" aria-label="Categorias da biblioteca">
+            <button class="category-filter-button is-active" type="button" data-category-filter="Todos">Todos</button>
+            <button class="category-filter-button" type="button" data-category-filter="Ação">Ação</button>
+            <button class="category-filter-button" type="button" data-category-filter="Aventura">Aventura</button>
+            <button class="category-filter-button" type="button" data-category-filter="Corrida">Corrida</button>
+            <button class="category-filter-button" type="button" data-category-filter="RPG">RPG</button>
+            <button class="category-filter-button" type="button" data-category-filter="Estratégia">Estratégia</button>
+            <button class="category-filter-button" type="button" data-category-filter="Esporte">Esporte</button>
+            <button class="category-filter-button" type="button" data-category-filter="Simulação">Simulação</button>
+            <button class="category-filter-button" type="button" data-category-filter="Indie">Indie</button>
+            <button class="category-filter-button" type="button" data-category-filter="Linux">Linux</button>
+            <button class="category-filter-button" type="button" data-category-filter="Lutris">games</button>
+            <button class="category-filter-button" type="button" data-category-filter="Retro">Retro</button>
+            <button class="category-filter-button" type="button" data-category-filter="Outros">Outros</button>
+        </section>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4" id="gameGrid">
+            
+        </div>
+    </main>
+
+    <div class="modal fade" id="addSteamModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <form class="modal-content border-0 shadow-lg rounded-4" id="addSteamForm">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="addSteamTitle">
+                        <i class="bi bi-plus-circle me-2 text-primary"></i>Adicionar jogo
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="steamGameName">Nome do jogo</label>
+                        <input class="form-control" id="steamGameName" type="text" autocomplete="off" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold" for="steamAppId">App ID da Steam ou caminho do executável</label>
+                        <input class="form-control" id="steamAppId" type="text" autocomplete="off" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold" for="steamGameCategory">Categoria</label>
+                        <select class="form-select" id="steamGameCategory">
+                            <option value="Ação">Ação</option>
+                            <option value="Aventura">Aventura</option>
+                            <option value="Corrida">Corrida</option>
+                            <option value="RPG">RPG</option>
+                            <option value="Estratégia">Estratégia</option>
+                            <option value="Esporte">Esporte</option>
+                            <option value="Simulação">Simulação</option>
+                            <option value="Indie">Indie</option>
+                            <option value="Retro">Retro</option>
+                            <option value="Outros" selected>Outros</option>
+                        </select>
+                    </div>
+                    <p class="text-muted small mb-0">Use um App ID como 883710 ou um caminho completo como
+                        D:\SteamLibrary\steamapps\common\RESIDENT EVIL 2 BIOHAZARD RE2\re2.exe.</p>
+                    <div class="steam-api-config mt-3">
+                        <div>
+                            <label class="form-label fw-bold" for="steamApiKey">Steam Web API Key</label>
+                            <input class="form-control" id="steamApiKey" type="password" placeholder="Chave da API Steam" autocomplete="off">
+                            <p class="text-muted small mb-0" id="steamApiStatus">A URL da API Steam fica pronta no launcher; informe a key apenas uma vez.</p>
+                        </div>
+                        <button class="btn btn-outline-primary fw-bold" id="saveSteamApiKeyButton" type="button">Salvar key</button>
+                    </div>
+                    <div class="virtual-keyboard mt-3" id="virtualKeyboard" aria-label="Teclado virtual"></div>
+                    <div class="alert alert-danger mt-3 mb-0 d-none" id="addSteamError"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn controller-action controller-action-b px-4" data-bs-dismiss="modal">
+                        <span class="controller-badge">B</span>
+                        <span>Cancelar</span>
+                    </button>
+                    <button type="submit" class="btn controller-action controller-action-a px-4" id="saveSteamGameButton">
+                        <span class="controller-badge">A</span>
+                        <span>Adicionar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addLutrisModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <form class="modal-content border-0 shadow-lg rounded-4" id="addLutrisForm">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-controller me-2 text-primary"></i>Adicionar games
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="lutrisGameName">Nome do jogo</label>
+                        <input class="form-control" id="lutrisGameName" type="text" autocomplete="off" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="lutrisGameId"> Se for Lutris / ID</label>
+                        <input class="form-control" id="lutrisGameId" type="text" autocomplete="off" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold" for="lutrisGameCategory">Categoria</label>
+                        <select class="form-select" id="lutrisGameCategory">
+                            <option value="Lutris" selected>Games</option>
+                            <option value="Ação">Ação</option>
+                            <option value="Aventura">Aventura</option>
+                            <option value="Corrida">Corrida</option>
+                            <option value="RPG">RPG</option>
+                            <option value="Estratégia">Estratégia</option>
+                            <option value="Esporte">Esporte</option>
+                            <option value="Simulação">Simulação</option>
+                            <option value="Indie">Indie</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-danger mt-3 mb-0 d-none" id="addLutrisError"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn controller-action controller-action-b px-4" data-bs-dismiss="modal">
+                        <span class="controller-badge">B</span>
+                        <span>Cancelar</span>
+                    </button>
+                    <button type="submit" class="btn controller-action controller-action-a px-4" id="saveLutrisGameButton">
+                        <span class="controller-badge">A</span>
+                        <span>Salvar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profileSourceModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-person-badge me-2 text-primary"></i>Escolher perfil
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-game-actions">
+                        <button class="btn controller-action controller-action-a px-4" id="openRetroAchievementsProfile" type="button">
+                            <span class="controller-badge">A</span>
+                            <span>RetroAchievements</span>
+                        </button>
+                        <button class="btn controller-action controller-action-edit px-4" id="openSteamProfile" type="button">
+                            <i class="bi bi-steam"></i>
+                            <span>Steam</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profileAchievementsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-trophy-fill me-2 text-primary"></i>Perfil e conquistas
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body profile-achievements-modal">
+                    <section class="ra-config-card mb-4" id="raConfigCard">
+                        <div>
+                            <span class="section-kicker">RetroAchievements</span>
+                            <h3 class="fw-bold mb-1">Consultar RetroAchievements</h3>
+                            <p class="text-muted mb-0">A API key fica salva no JSON local. Consulte o perfil por usuário ou veja a conquista da semana.</p>
+                        </div>
+                        <form class="ra-config-form" id="raConfigForm">
+                            <input class="form-control" id="raUsername" type="text" placeholder="Usuário RetroAchievements" autocomplete="off">
+                            <input class="form-control" id="raApiKey" type="password" placeholder="Web API Key opcional" autocomplete="off">
+                            <button class="btn btn-primary fw-bold" type="submit">Perfil</button>
+                            <button class="btn btn-outline-primary fw-bold" id="loadRaWeekButton" type="button">Semana</button>
+                            <button class="btn btn-outline-primary fw-bold" id="loadSteamProfileButton" type="button">Steam</button>
+                        </form>
+                        <p class="text-muted small mb-0">Se informar uma key no campo opcional, ela fica salva apenas neste projeto, no JSON local.</p>
+                        <div class="alert alert-danger mt-3 mb-0 d-none" id="raError"></div>
+                    </section>
+
+                    <section class="ra-profile d-none" id="raProfilePanel">
+                        <div class="ra-hero">
+                            <img class="ra-avatar" id="raAvatar" src="./src/img/perfil/avatargamer0.jpg" alt="Avatar RetroAchievements">
+                            <div class="ra-hero-copy">
+                                <span class="section-kicker" id="profileSourceLabel">RetroAchievements</span>
+                                <h2 id="raProfileName">RetroAchievements</h2>
+                                <p id="raMotto" class="text-muted mb-0"></p>
+                                <p id="raRichPresence" class="ra-presence mb-0"></p>
+                            </div>
+                            <div class="ra-stat-grid">
+                                <div class="ra-stat"><span id="raPoints">0</span><small id="profileStatOneLabel">Pontos</small></div>
+                                <div class="ra-stat"><span id="raTruePoints">0</span><small id="profileStatTwoLabel">True ratio</small></div>
+                                <div class="ra-stat"><span id="raRank">-</span><small id="profileStatThreeLabel">Rank</small></div>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mt-1">
+                            <div class="col-12 col-lg-8">
+                                <div class="ra-section-card">
+                                    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                                        <h3 class="fw-bold mb-0" id="profileDetailsTitle">Conquistas recentes</h3>
+                                        <button class="btn btn-primary btn-sm fw-bold" id="refreshRaProfile" type="button">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Atualizar
+                                        </button>
+                                    </div>
+                                    <div class="ra-achievements" id="raAchievements"></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-4">
+                                <div class="ra-section-card">
+                                    <h3 class="fw-bold mb-3" id="profileAsideTitle">Últimos jogos</h3>
+                                    <div class="ra-games" id="raRecentGames"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addEmulatorModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <form class="modal-content border-0 shadow-lg rounded-4" id="addEmulatorForm">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="addEmulatorTitle">
+                        <i class="bi bi-cpu me-2 text-primary"></i>Adicionar emulador RetroArch
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold" for="emulatorName">Nome do emulador</label>
+                            <input class="form-control" id="emulatorName" type="text" placeholder="Super Nintendo" autocomplete="off"  required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold" for="retroarchPath">RetroArch</label>
+                            <div class="input-group">
+                                <label class="btn btn-outline-primary fw-bold" for="retroarchPath">
+                                    <i class="bi bi-folder2-open me-2"></i>Selecionar
+                                </label>
+                                <input class="visually-hidden" id="retroarchPath" type="file">
+                                <input class="form-control" id="retroarchPathDisplay" type="text" value="Nenhum arquivo selecionado" readonly>
+                            </div>
+                            <p class="text-muted small mb-0 mt-2">Selecione o executavel do Retroarch</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold" for="retroarchCorePath">Core do RetroArch</label>
+                            <div class="input-group">
+                                <label class="btn btn-outline-primary fw-bold" for="retroarchCorePath">
+                                    <i class="bi bi-folder2-open me-2"></i>Selecionar
+                                </label>
+                                <input class="visually-hidden" id="retroarchCorePath" type="file" accept=".so">
+                                <input class="form-control" id="retroarchCorePathDisplay" type="text" value="Nenhum arquivo selecionado" readonly>
+                            </div>
+                            <p class="text-muted small mb-0 mt-2">Selecione o core .so</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold" for="romsPath">Pasta das ROMs</label>
+                            <div class="input-group">
+                                <label class="btn btn-outline-primary fw-bold" for="romsPath">
+                                    <i class="bi bi-folder2-open me-2"></i>Selecionar pasta
+                                </label>
+                                <input class="visually-hidden" id="romsPath" type="file" webkitdirectory>
+                                <input class="form-control" id="romsPathDisplay" type="text" value="Nenhuma pasta selecionada" readonly>
+                            </div>
+                            <p class="text-muted small mb-0 mt-2">Selecione a pasta das Roms</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold" for="romExtensions">Extensões</label>
+                            <input class="form-control" id="romExtensions" type="text" value=".sfc, .smc, .zip" autocomplete="off">
+                            <p class="text-muted small mb-0 mt-2">Separe por vírgula. Exemplo: .nes, .sfc, .gba, .zip</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger mt-3 mb-0 d-none" id="addEmulatorError"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn controller-action controller-action-b px-4" data-bs-dismiss="modal">
+                        <span class="controller-badge">B</span>
+                        <span>Cancelar</span>
+                    </button>
+                    <button type="submit" class="btn controller-action controller-action-a px-4" id="saveEmulatorButton">
+                        <span class="controller-badge">A</span>
+                        <span>Adicionar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="trailerModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+                <div class="modal-header border-0 py-3">
+                    <h5 class="modal-title fw-bold" id="gameLabel">Bit&Rust</h5>
+                </div>
+
+                <div class="modal-body p-0 game-detail-modal-body">
+                    <div class="row g-0 game-detail-layout">
+                        <div class="col-lg-7 game-detail-preview-column">
+                            <div class="video-container-full bg-black">
+                                <div id="videoPlayer" class="h-100 w-100"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5 text-center d-flex flex-column justify-content-center modal-info-panel game-detail-info">
+                            <i class="bi bi-joystick"></i>
+                            <h2 class="fw-bold mb-3" id="infoTitle">Doom 3 BFG Edition</h2>
+                            <p class="text-muted mb-4 small"><span>Este game está pronto para iniciar no seu
+                                    sistema.</span></p>
+                            <div class="info-section text-start mb-4">
+                                <h4 class="fw-bold text-primary mb-3 border-bottom pb-2">Sobre o Jogo</h4>
+                                <div id="gameDescription">
+                                    <p><strong>Doom 3: BFG Edition</strong> Desenvolvido pela <em>id Software</em> e lançado
+                                        originalmente,
+                                        lançada em 2004.</p>
+                                    <p>DOOM 3 é um aclamado jogo de tiro em primeira pessoa de horror e ação.
+                                        Ele foi remasterizado com a <em>DOOM 3: BFG Edition em 2012.</em> Agora você pode ter as
+                                        duas versões do jogo base e as expansões em um único lugar.</p>
+                                </div>
+                            </div>
+                            <div class="rom-rename-panel d-none" id="romRenamePanel">
+                                <label class="rom-rename-label" for="romDisplayNameInput">Nome de exibição</label>
+                                <input class="form-control" id="romDisplayNameInput" type="text" autocomplete="off">
+                                <div class="virtual-keyboard rom-rename-keyboard" id="romRenameKeyboard" aria-label="Teclado virtual da ROM"></div>
+                            </div>
+                            <div class="modal-game-actions">
+                                <button class="btn controller-action controller-action-a shadow" id="startGameButton"
+                                    onclick="iniciarJogo()">
+                                    <span class="controller-badge">A</span>
+                                    <span>Iniciar</span>
+                                </button>
+                                <button class="btn controller-action controller-action-edit shadow d-none"
+                                    id="editGameButton" onclick="editarJogoSelecionado()">
+                                    <i class="bi bi-pencil-square"></i>
+                                    <span>Editar</span>
+                                </button>
+                                <button class="btn controller-action controller-action-edit shadow d-none"
+                                    id="renameRomButton" onclick="alterarNomeRomSelecionada()">
+                                    <i class="bi bi-type"></i>
+                                    <span>Nome de exibição</span>
+                                </button>
+                                <button class="btn controller-action controller-action-edit shadow d-none"
+                                    id="editEmulatorButton" onclick="editarEmuladorSelecionado()">
+                                    <i class="bi bi-cpu"></i>
+                                    <span>Editar core</span>
+                                </button>
+                                <button class="btn controller-action controller-action-delete shadow d-none"
+                                    id="deleteGameButton" onclick="excluirJogoSelecionado()">
+                                    <i class="bi bi-trash3"></i>
+                                    <span>Excluir</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn controller-action controller-action-b px-4" data-bs-dismiss="modal"
+                        onclick="stopVideo()">
+                        <span class="controller-badge">B</span>
+                        <span>Fechar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./src/js/modal-alert.js"></script>
+    <script src="./src/js/script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bit&amp;Rust Usuários</title>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="./src/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar fixed-top app-navbar">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <button class="navbar-toggler border-0 icon-button" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#sidebar" aria-label="Abrir menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand m-0 fw-bold d-flex align-items-center" href="./index.html">
+                <i class="bi bi-grid-3x3-gap-fill me-2"></i>Bit&amp;Rust
+            </a>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">
+                    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                </button>
+                <a class="btn btn-primary app-action-btn fw-bold" href="./index.html">
+                    <i class="bi bi-house-fill me-2"></i>Menu Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold text-primary">Menu Principal</h5>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item"><a class="nav-link" href="./webapp.html"><i class="bi bi-house-door me-2"></i>Web app</a></li>
+                <li class="nav-item"><a class="nav-link" href="./index.html"><i class="bi bi-controller me-2"></i>Meus Jogos</a></li>
+                <li class="nav-item"><a class="nav-link active" href="./users.html"><i class="bi bi-people me-2"></i>Usuários</a></li>
+            </ul>
+
+            <div class="sidebar-utility-actions">
+                <a class="nav-link sidebar-settings-link" href="./settings.html">
+                    <i class="bi bi-gear"></i>
+                    <span>Configurações</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <main class="container-fluid px-4 py-4">
+        <section class="library-header mb-4">
+            <div>
+                <span class="section-kicker">Perfis</span>
+                <h1>Usuários</h1>
+            </div>
+        </section>
+
+        <section class="row g-4">
+            <div class="col-12 col-xl-5">
+                <article class="game-card p-4 h-100">
+                    <h3 class="fw-bold mb-3" id="userFormTitle">Adicionar usuário</h3>
+                    <form id="userForm" class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold" for="userName">Nome</label>
+                            <input class="form-control" id="userName" type="text" autocomplete="off" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold" for="retroUsername">Usuário RetroAchievements</label>
+                            <input class="form-control" id="retroUsername" type="text" autocomplete="off" placeholder="User retroachievements">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold" for="steamId">SteamID64 ou usuário Steam</label>
+                            <input class="form-control" id="steamId" type="text" autocomplete="off" placeholder="999990... ou User">
+                        </div>
+                        <div class="col-12 form-check ms-2">
+                            <input class="form-check-input" id="activeUser" type="checkbox" checked>
+                            <label class="form-check-label fw-bold" for="activeUser">Usar como usuário ativo</label>
+                        </div>
+                        <div class="col-12">
+                            <div class="virtual-keyboard" id="virtualKeyboard" aria-label="Teclado virtual"></div>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary fw-bold" id="saveUserButton" type="submit">
+                                <i class="bi bi-person-plus me-2"></i>Adicionar
+                            </button>
+                            <button class="btn btn-outline-primary fw-bold d-none" id="cancelUserEditButton" type="button">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar edição
+                            </button>
+                        </div>
+                    </form>
+                    <div class="alert alert-danger mt-3 mb-0 d-none" id="userError"></div>
+                    <div class="alert alert-success mt-3 mb-0 d-none" id="userSuccess"></div>
+                </article>
+            </div>
+
+            <div class="col-12 col-xl-7">
+                <article class="game-card p-4 h-100">
+                    <h3 class="fw-bold mb-3">Usuários cadastrados</h3>
+                    <div class="user-list" id="userList"></div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./src/js/users.js"></script>
+</body>
+
+</html>

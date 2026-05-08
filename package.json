@@ -1,0 +1,91 @@
+{
+  "name": "bit-rust-launcher",
+  "version": "1.0.0",
+  "description": "Launcher desktop de jogos em Electron com persistencia local em SQLite.",
+  "main": "src/main.js",
+  "homepage": "https://github.com/bit-rust/launcher",
+  "scripts": {
+    "start": "node ./scripts/run-electron.js .",
+    "dev": "node ./scripts/run-electron.js .",
+    "start:linux": "scripts/start-electron.sh .",
+    "doctor": "scripts/electron-doctor.sh",
+    "fix:sandbox": "scripts/fix-electron-sandbox.sh",
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/storage.js && node --check interface/src/js/script.js && node --check interface/src/js/users.js && node --check interface/src/js/settings.js && node --check interface/src/js/store.js",
+    "build": "node scripts/build.js",
+    "build:appimage": "node scripts/build.js appimage",
+    "build:deb": "node scripts/build.js deb",
+    "build:linux": "node scripts/build.js linux",
+    "build:win": "node scripts/build.js win"
+  },
+  "keywords": [
+    "electron",
+    "launcher",
+    "games",
+    "steam",
+    "retroarch"
+  ],
+  "author": {
+    "name": "Bit&Rust",
+    "email": "contato@bitrust.local"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^41.3.0",
+    "electron-builder": "^26.8.1",
+    "npm": "^10.9.4"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
+    "sqlite3": "^6.0.1"
+  },
+  "build": {
+    "appId": "com.bitrust.launcher",
+    "productName": "BitRust Launcher",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "afterPack": "scripts/after-pack.js",
+    "files": [
+      "src/**/*",
+      "interface/**/*",
+      "package.json",
+      "!data/**/*",
+      "!scripts/**/*",
+      "!*.log"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/sqlite3/**/*"
+    ],
+    "npmRebuild": false,
+    "linux": {
+      "category": "Game",
+      "maintainer": "Bit&Rust <contato@bitrust.local>",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "src/ico/ico.png"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "src/ico/ico.png",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "artifactName": "${productName}-Setup-${version}-${os}-${arch}.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}-${os}-${arch}.${ext}"
+    }
+  }
+}
