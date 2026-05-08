@@ -32,7 +32,7 @@
   "devDependencies": {
     "electron": "^41.3.0",
     "electron-builder": "^26.8.1",
-    "npm": "^10.9.4"
+    "npm": "^10.9.8"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
