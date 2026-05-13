@@ -3490,4 +3490,9 @@ async function iniciarJogo() {
         showControllerAlert(`Erro ao iniciar jogo: ${error}`);
     }
 }
+startGameButton?.addEventListener('click', (event) => {
+    event.preventDefault();
+    iniciarJogo();
+});
+window.iniciarJogo = iniciarJogo;
 //# sourceMappingURL=script.js.map

@@ -86,7 +86,11 @@ function loop() {
         keyboardMode = false;
         sendAction('keyboard-close');
       }
-      if (pressedOnce(gamepad, 2)) sendAction('keyboard-backspace');
+      if (pressedOnce(gamepad, 2)) {
+        keyboardMode = false;
+        sendAction('keyboard-close');
+      }
+      if (pressedOnce(gamepad, 3)) sendAction('keyboard-backspace');
       if (pressedOnce(gamepad, 4) || pressedOnce(gamepad, 5)) sendAction('keyboard-shift');
       if (pressedOnce(gamepad, 6)) sendAction('keyboard-cursor-left');
       if (pressedOnce(gamepad, 7)) sendAction('keyboard-cursor-right');

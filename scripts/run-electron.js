@@ -6,6 +6,10 @@ const electron = require('electron');
 const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
 
+if (process.argv.includes('--no-sandbox')) {
+  env.ELECTRON_DISABLE_SANDBOX = '1';
+}
+
 const child = spawn(electron, process.argv.slice(2), {
   env,
   stdio: 'inherit',

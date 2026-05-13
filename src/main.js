@@ -41,6 +41,8 @@ const LAUNCHER_BROWSER_CACHE_DIRS = [
 // Linux can refuse Electron's Chromium sandbox in restricted launch contexts
 // such as browser-spawned shells, CI containers, and some hardened sessions.
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('no-sandbox');
+app.commandLine.appendSwitch('disable-setuid-sandbox');
 app.commandLine.appendSwitch('disable-dev-shm-usage');
 app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
 app.commandLine.appendSwitch('disable-gpu-program-cache');
@@ -1897,8 +1899,15 @@ async function openExternalUrl(url) {
     const opener = process.env.XDG_CURRENT_DESKTOP ? 'xdg-open' : 'gio';
     launchDetached(opener, opener === 'gio' ? ['open', url] : [url]);
 }
+async function openSteamUrl(url) {
+    if (process.platform === 'linux' && await commandExists('steam')) {
+        launchDetached('steam', [url]);
+        return;
+    }
+    await openExternalUrl(url);
+}
 async function openSteamInstall(appId) {
-    await openExternalUrl(`steam://install/${appId}`);
+    await openSteamUrl(`steam://install/${appId}`);
     return ok(`Abrindo instalação do Steam App ID ${appId}.`, {
         install_required: true,
         app_id: appId
@@ -1934,7 +1943,7 @@ async function launchItem(item) {
                 return openSteamInstall(appId);
             }
             const monitorToken = beginGameMonitor('steam');
-            await openExternalUrl(`steam://rungameid/${appId}`);
+            await openSteamUrl(`steam://rungameid/${appId}`);
             monitorSteamGame(appId, monitorToken);
             return { ok: true };
         }
