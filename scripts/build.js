@@ -17,13 +17,30 @@ const checkFiles = [
   'src/main.js',
   'src/preload.js',
   'src/storage.js',
+  'src/browser-view-controller-preload.js',
   'interface/src/js/script.js',
   'interface/src/js/users.js',
   'interface/src/js/settings.js',
-  'interface/src/js/store.js'
+  'interface/src/js/store.js',
+  'interface/src/js/modal-alert.js',
+  'interface/src/js/page-tabs-modal.js',
+  'interface/src/js/browser-control-mode.js',
+  'scripts/build.js',
+  'scripts/run-electron.js',
+  'scripts/after-pack.js',
+  'scripts/verify.js'
 ];
 
 function runSyntaxCheck() {
+  const compileResult = spawnSync(process.execPath, ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.json'], {
+    cwd: projectDir,
+    stdio: 'inherit'
+  });
+
+  if (compileResult.status !== 0) {
+    throw new Error('TypeScript compilation failed.');
+  }
+
   for (const file of checkFiles) {
     const result = spawnSync(process.execPath, ['--check', file], {
       cwd: projectDir,
@@ -121,7 +138,7 @@ function createTargets() {
   }
 
   if (target === 'linux') {
-    return Platform.LINUX.createTarget(['AppImage']);
+    return Platform.LINUX.createTarget(['AppImage', 'deb']);
   }
 
   if (target === 'win') {

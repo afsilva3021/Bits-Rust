@@ -5,12 +5,17 @@
   "main": "src/main.js",
   "homepage": "https://github.com/bit-rust/launcher",
   "scripts": {
-    "start": "node ./scripts/run-electron.js .",
-    "dev": "node ./scripts/run-electron.js .",
+    "compile": "tsc -p tsconfig.json",
+    "start": "npm run compile && node ./scripts/run-electron.js .",
+    "dev": "npm run compile && node ./scripts/run-electron.js .",
     "start:linux": "scripts/start-electron.sh .",
     "doctor": "scripts/electron-doctor.sh",
     "fix:sandbox": "scripts/fix-electron-sandbox.sh",
-    "check": "node --check src/main.js && node --check src/preload.js && node --check src/storage.js && node --check interface/src/js/script.js && node --check interface/src/js/users.js && node --check interface/src/js/settings.js && node --check interface/src/js/store.js",
+    "check": "node scripts/verify.js --syntax",
+    "test": "npm run compile && node --test tests/unit/*.test.js",
+    "verify": "node scripts/verify.js",
+    "release:linux": "node scripts/verify.js && node scripts/build.js linux",
+    "release:win": "node scripts/verify.js && node scripts/build.js win",
     "build": "node scripts/build.js",
     "build:appimage": "node scripts/build.js appimage",
     "build:deb": "node scripts/build.js deb",
@@ -30,9 +35,11 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^25.7.0",
     "electron": "^41.3.0",
     "electron-builder": "^26.8.1",
-    "npm": "^10.9.4"
+    "npm": "^10.9.4",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",

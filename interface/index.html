@@ -119,6 +119,14 @@
                 <h1>Escolha seu próximo jogo</h1>
             </div>
             <div class="library-actions">
+                <div class="library-search" id="librarySearchControl">
+                    <i class="bi bi-search"></i>
+                    <input id="gameSearchInput" type="search" placeholder="Pesquisar regex" autocomplete="off"
+                        spellcheck="false" aria-label="Pesquisar jogos por regex">
+                    <button class="library-search-clear" id="clearGameSearch" type="button" aria-label="Limpar pesquisa">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
                 <button class="btn btn-primary steam-add-button" id="openAddEmulatorModal" type="button">
                     <i class="bi bi-cpu me-2"></i>Adicionar emulador
                 </button>
@@ -154,10 +162,90 @@
             <button class="category-filter-button" type="button" data-category-filter="Outros">Outros</button>
         </section>
 
+        <p class="library-search-status d-none" id="gameSearchStatus"></p>
+
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4" id="gameGrid">
-            
+
         </div>
     </main>
+
+    <div class="modal fade" id="gameSearchModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-search me-2 text-primary"></i>Pesquisar jogos
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-bold" for="gameSearchModalInput">Regex</label>
+                    <input class="form-control form-control-lg" id="gameSearchModalInput" type="text"
+                        placeholder="Ex: mario|zelda|^super" autocomplete="off" spellcheck="false">
+                    <div class="virtual-keyboard mt-3" id="gameSearchKeyboard" aria-label="Teclado virtual da pesquisa"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn controller-action controller-action-b px-4" id="closeGameSearchModal">
+                        <span class="controller-badge">B</span>
+                        <span>Fechar</span>
+                    </button>
+                    <button type="button" class="btn controller-action controller-action-a px-4" id="applyGameSearchModal">
+                        <span class="controller-badge">A</span>
+                        <span>Pesquisar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="controllerAccessModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-window-sidebar me-2 text-primary"></i>Acessar
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="controller-page-list" id="controllerAccessList"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn controller-action controller-action-b px-4" id="controllerAccessCancel">
+                        <span class="controller-badge">B</span>
+                        <span>Cancelar</span>
+                    </button>
+                    <button type="button" class="btn controller-action controller-action-a px-4" id="controllerAccessConfirm">
+                        <span class="controller-badge">A</span>
+                        <span>Acessar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="controllerClosePageModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-x-square me-2 text-danger"></i>Fechar pagina
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="controller-page-list" id="controllerClosePageList"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn controller-action controller-action-b px-4" id="controllerClosePageCancel">
+                        <span class="controller-badge">B</span>
+                        <span>Cancelar</span>
+                    </button>
+                    <button type="button" class="btn controller-action controller-action-delete px-4" id="controllerClosePageConfirm">
+                        <span class="controller-badge">A</span>
+                        <span>Fechar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="addSteamModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -510,6 +598,7 @@
 
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./src/js/modal-alert.js"></script>
+    <script src="./src/js/page-tabs-modal.js"></script>
     <script src="./src/js/script.js"></script>
 </body>
 

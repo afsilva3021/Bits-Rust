@@ -376,6 +376,63 @@ body > * {
     flex-wrap: wrap;
 }
 
+.library-search {
+    min-width: min(360px, 100%);
+    min-height: 42px;
+    display: inline-grid;
+    grid-template-columns: auto minmax(150px, 1fr) auto;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0 0.75rem;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    scroll-margin-top: 110px;
+}
+
+.library-search input {
+    width: 100%;
+    min-width: 0;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-weight: 800;
+}
+
+.library-search input::placeholder {
+    color: var(--muted);
+}
+
+.library-search-clear {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+}
+
+.library-search-clear:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+.library-search.is-invalid {
+    border-color: rgba(239, 68, 68, 0.75);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14);
+}
+
+.library-search-status {
+    margin: -0.35rem 0 1rem;
+    color: var(--danger, #ef4444);
+    font-weight: 800;
+}
+
 .steam-add-button {
     min-height: 42px;
     border-radius: 14px;
@@ -476,6 +533,7 @@ body > * {
 .icon-button.is-controller-selected,
 .app-action-btn.is-controller-selected,
 .steam-add-button.is-controller-selected,
+.library-search.is-controller-selected,
 .category-filter-button.is-controller-selected,
 .navbar-brand.is-controller-selected {
     background: var(--surface-hover) !important;
@@ -1447,6 +1505,10 @@ body > * {
         width: 100%;
     }
 
+    .library-search {
+        width: 100%;
+    }
+
     .steam-add-button {
         width: 100%;
     }
@@ -1607,6 +1669,12 @@ body.browser-open .launcher-browser {
     border: 0;
 }
 
+.launcher-browser.is-launcher-webview webview {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 .virtual-browser-cursor {
     position: absolute;
     left: 50%;
@@ -1665,6 +1733,79 @@ body.browser-open .launcher-browser {
     background: var(--accent-strong);
     border-color: var(--accent);
     outline: 3px solid rgba(71, 181, 255, 0.45);
+}
+
+.controller-page-list {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.browser-choice-modal,
+.global-page-tabs-modal {
+    z-index: 30000;
+}
+
+.browser-choice-modal .modal-dialog,
+.global-page-tabs-modal .modal-dialog {
+    width: min(560px, calc(100vw - 32px));
+    max-width: min(560px, calc(100vw - 32px));
+    margin-inline: auto;
+}
+
+.browser-choice-modal .modal-content,
+.global-page-tabs-modal .modal-content {
+    overflow: hidden;
+}
+
+body.browser-open .modal-backdrop {
+    z-index: 29990;
+}
+
+.controller-page-option {
+    width: 100%;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    color: var(--text);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: left;
+    font-weight: 900;
+    overflow: hidden;
+}
+
+.controller-page-option i {
+    flex: 0 0 auto;
+    color: var(--accent);
+    font-size: 1.25rem;
+}
+
+.controller-page-option > div {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.controller-page-option span {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.controller-page-option small {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .browser-key-wide {

@@ -1,4 +1,3 @@
-"use strict";
 // @ts-nocheck
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
@@ -6,42 +5,50 @@ const exitLauncher = document.getElementById('exitLauncher');
 const sidebarElement = document.getElementById('sidebar');
 const hasBootstrap = typeof bootstrap !== 'undefined';
 const sidebar = hasBootstrap ? bootstrap.Offcanvas.getOrCreateInstance(sidebarElement) : null;
+
 let selectedStoreIndex = 0;
 let selectedNavbarIndex = 0;
 let selectedSidebarIndex = 0;
 let selectedFilterIndex = 0;
 let navigationArea = 'store';
+
 function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem('gamepoint-theme', theme);
+
     if (themeIcon) {
         themeIcon.className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
     }
 }
+
 const savedTheme = localStorage.getItem('gamepoint-theme');
 const preferredTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 applyTheme(savedTheme || preferredTheme);
+
 if (themeToggle) {
     themeToggle.addEventListener('click', () => {
         const currentTheme = document.documentElement.dataset.theme || 'dark';
         applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
     });
 }
+
 if (exitLauncher) {
     exitLauncher.addEventListener('click', async (event) => {
         event.preventDefault();
+
         if (!window.pywebview || !window.pywebview.api) {
             window.close();
             return;
         }
+
         try {
             await window.pywebview.api.sair_launcher();
-        }
-        catch (error) {
+        } catch (error) {
             showControllerAlert(`Erro ao sair do launcher: ${error}`);
         }
     });
 }
+
 const filterButtons = document.querySelectorAll('.store-filter');
 const storeItems = document.querySelectorAll('.store-item');
 const storeGrid = document.getElementById('storeGrid');
@@ -80,6 +87,7 @@ let browserChoiceMode = '';
 let selectedBrowserChoiceIndex = 0;
 const BROWSER_PAGE_TABS_KEY = 'bit-rust-browser-page-tabs';
 loadBrowserPageTabs();
+
 const browserKeyboardLayout = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -93,14 +101,18 @@ const browserKeyboardLayout = [
         { label: 'Fechar', action: 'close', wide: true },
     ],
 ];
+
 function getBrowserControls() {
     return [];
 }
+
 function updateBrowserSelection() {
     const controls = getBrowserControls();
+
     if (!launcherBrowser || launcherBrowser.classList.contains('d-none') || !controls.length) {
         return;
     }
+
     selectedBrowserControlIndex = Math.max(0, Math.min(controls.length - 1, selectedBrowserControlIndex));
     controls.forEach((item, index) => {
         const selected = index === selectedBrowserControlIndex;
@@ -109,35 +121,43 @@ function updateBrowserSelection() {
     });
     controls[selectedBrowserControlIndex].focus({ preventScroll: true });
 }
+
 function clampBrowserCursor() {
     const rect = browserStage.getBoundingClientRect();
     browserCursorX = Math.max(0, Math.min(rect.width, browserCursorX));
     browserCursorY = Math.max(0, Math.min(rect.height, browserCursorY));
 }
+
 function updateBrowserCursor() {
     if (!browserStage || !browserCursor) {
         return;
     }
+
     const rect = browserStage.getBoundingClientRect();
     if (!browserCursorX && !browserCursorY) {
         browserCursorX = rect.width / 2;
         browserCursorY = rect.height / 2;
     }
+
     clampBrowserCursor();
     browserCursor.style.left = `${browserCursorX}px`;
     browserCursor.style.top = `${browserCursorY}px`;
 }
+
 function getBrowserScreenPoint() {
     const rect = browserStage.getBoundingClientRect();
+
     return {
         x: window.screenX + rect.left + browserCursorX,
         y: window.screenY + rect.top + browserCursorY,
     };
 }
+
 function getBrowserBounds() {
     if (!browserStage) {
         return { x: 0, y: 0, width: 1280, height: 720 };
     }
+
     const rect = browserStage.getBoundingClientRect();
     return {
         x: rect.left,
@@ -146,13 +166,16 @@ function getBrowserBounds() {
         height: rect.height,
     };
 }
+
 function getActiveBrowserFrame() {
     return browserWebviews.get(activeBrowserPageId)?.frame || browserFrame;
 }
+
 function setupBrowserFrameEvents(frame) {
     if (!frame || frame.dataset.eventsReady === '1') {
         return;
     }
+
     frame.dataset.eventsReady = '1';
     frame.addEventListener('dom-ready', () => {
         polishBrowserPage();
@@ -166,6 +189,7 @@ function setupBrowserFrameEvents(frame) {
         }
     });
 }
+
 function ensureBrowserWebview(url, title) {
     const pageId = browserPageIdFromUrl(url) || `page-${Date.now()}`;
     const existing = browserWebviews.get(pageId);
@@ -175,13 +199,14 @@ function ensureBrowserWebview(url, title) {
             entry.frame.classList.toggle('d-none', id !== pageId);
         });
         currentBrowserUrl = existing.url;
-        if (browserTitle)
-            browserTitle.textContent = existing.title;
+        if (browserTitle) browserTitle.textContent = existing.title;
         return existing.frame;
     }
+
     const frame = browserWebviews.size === 0 && browserFrame
         ? browserFrame
         : document.createElement('webview');
+
     if (frame !== browserFrame) {
         frame.id = `browserFrame-${pageId}`;
         frame.setAttribute('title', 'Navegador do launcher');
@@ -189,6 +214,7 @@ function ensureBrowserWebview(url, title) {
         frame.setAttribute('allowfullscreen', '');
         browserStage.insertBefore(frame, browserCursor);
     }
+
     frame.dataset.pageId = pageId;
     setupBrowserFrameEvents(frame);
     browserWebviews.set(pageId, { frame, url, title });
@@ -198,47 +224,46 @@ function ensureBrowserWebview(url, title) {
     });
     return frame;
 }
+
 function browserPageIdFromUrl(url) {
     try {
         const host = new URL(String(url || '')).hostname.toLowerCase();
-        if (host.includes('youtube.com'))
-            return 'youtube';
-        if (host.includes('google.com'))
-            return 'google';
-        if (host.includes('discord.com'))
-            return 'discord';
-    }
-    catch {
+        if (host.includes('youtube.com')) return 'youtube';
+        if (host.includes('google.com')) return 'google';
+        if (host.includes('discord.com')) return 'discord';
+    } catch {
         return '';
     }
+
     return '';
 }
+
 function browserPageIcon(pageId) {
-    if (pageId === 'youtube')
-        return 'bi bi-youtube';
-    if (pageId === 'google')
-        return 'bi bi-google';
-    if (pageId === 'discord')
-        return 'bi bi-discord';
+    if (pageId === 'youtube') return 'bi bi-youtube';
+    if (pageId === 'google') return 'bi bi-google';
+    if (pageId === 'discord') return 'bi bi-discord';
     return 'bi bi-window';
 }
+
 function loadBrowserPageTabs() {
     try {
         const parsed = JSON.parse(localStorage.getItem(BROWSER_PAGE_TABS_KEY) || '[]');
         browserPageTabs = Array.isArray(parsed) ? parsed.filter((tab) => tab?.id && tab?.url) : [];
-    }
-    catch {
+    } catch {
         browserPageTabs = [];
     }
 }
+
 function saveBrowserPageTabs() {
     localStorage.setItem(BROWSER_PAGE_TABS_KEY, JSON.stringify(browserPageTabs));
 }
+
 function addBrowserPageTab(url, title) {
     const id = browserPageIdFromUrl(url);
     if (!id) {
         return;
     }
+
     const existing = browserPageTabs.find((tab) => tab.id === id);
     const tab = {
         id,
@@ -246,49 +271,57 @@ function addBrowserPageTab(url, title) {
         url,
         active: true
     };
+
     browserPageTabs.forEach((item) => {
         item.active = false;
     });
+
     if (existing) {
         Object.assign(existing, tab);
-    }
-    else {
+    } else {
         browserPageTabs.push(tab);
     }
+
     saveBrowserPageTabs();
 }
+
 function closeBrowserPageTab(tabId) {
     const closingActive = browserPageIdFromUrl(currentBrowserUrl) === tabId;
     const webview = browserWebviews.get(tabId)?.frame;
     if (webview && webview !== browserFrame) {
         webview.remove();
-    }
-    else if (webview) {
+    } else if (webview) {
         webview.src = 'about:blank';
     }
     browserWebviews.delete(tabId);
     browserPageTabs = browserPageTabs.filter((tab) => tab.id !== tabId);
     saveBrowserPageTabs();
+
     if (closingActive) {
         getActiveBrowserFrame().src = 'about:blank';
         currentBrowserUrl = '';
         closeStoreBrowser();
     }
 }
+
 window.onGlobalPageTabClosed = function onGlobalPageTabClosed(tab) {
     const closedId = tab?.pageKey || tab?.id || browserPageIdFromUrl(tab?.url);
     if (!closedId) {
         return;
     }
+
     closeBrowserPageTab(closedId);
 };
+
 function getBrowserChoiceOptions() {
     return Array.from(browserChoiceList?.querySelectorAll('.controller-page-option:not([disabled])') || []);
 }
+
 function ensureBrowserChoiceModal() {
     if (browserChoiceModal) {
         return;
     }
+
     browserChoiceModalElement = document.createElement('div');
     browserChoiceModalElement.className = 'modal fade browser-choice-modal';
     browserChoiceModalElement.tabIndex = -1;
@@ -317,6 +350,7 @@ function ensureBrowserChoiceModal() {
             </div>
         </div>
     `;
+
     document.body.appendChild(browserChoiceModalElement);
     browserChoiceTitle = browserChoiceModalElement.querySelector('.modal-title span');
     browserChoiceList = browserChoiceModalElement.querySelector('.controller-page-list');
@@ -341,27 +375,31 @@ function ensureBrowserChoiceModal() {
             }
         };
 }
+
 function isBrowserChoiceModalOpen() {
     return Boolean(browserChoiceModalElement?.classList.contains('show'));
 }
+
 function hideBrowserChoiceModal() {
     browserChoiceModal?.hide();
     browserChoiceMode = '';
     selectedBrowserChoiceIndex = 0;
 }
+
 document.addEventListener('keydown', (event) => {
     if (!isBrowserChoiceModalOpen()) {
         return;
     }
+
     if (event.key === 'Enter') {
         event.preventDefault();
         confirmBrowserChoice();
-    }
-    else if (event.key === 'Escape') {
+    } else if (event.key === 'Escape') {
         event.preventDefault();
         hideBrowserChoiceModal();
     }
 }, true);
+
 function createBrowserChoiceOption({ id, title, subtitle, icon, type }, selected = false) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -385,11 +423,13 @@ function createBrowserChoiceOption({ id, title, subtitle, icon, type }, selected
     });
     return button;
 }
+
 function updateBrowserChoiceSelection(scrollIntoView = true) {
     const options = getBrowserChoiceOptions();
     if (!options.length) {
         return;
     }
+
     selectedBrowserChoiceIndex = Math.max(0, Math.min(options.length - 1, selectedBrowserChoiceIndex));
     options.forEach((option, index) => {
         const selected = index === selectedBrowserChoiceIndex;
@@ -401,16 +441,18 @@ function updateBrowserChoiceSelection(scrollIntoView = true) {
         options[selectedBrowserChoiceIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
+
 function navigateBrowserChoice(direction) {
     if (direction === 'up' || direction === 'left') {
         selectedBrowserChoiceIndex -= 1;
-    }
-    else if (direction === 'down' || direction === 'right') {
+    } else if (direction === 'down' || direction === 'right') {
         selectedBrowserChoiceIndex += 1;
     }
+
     updateBrowserChoiceSelection();
     return true;
 }
+
 function openBrowserStartModal() {
     ensureBrowserChoiceModal();
     browserChoiceMode = 'start';
@@ -418,21 +460,25 @@ function openBrowserStartModal() {
     browserChoiceTitle.textContent = 'O que deseja fazer?';
     browserChoiceConfirm.querySelector('span:last-child').textContent = 'Selecionar';
     browserChoiceList.innerHTML = '';
-    browserChoiceList.append(createBrowserChoiceOption({
-        id: 'games',
-        type: 'games',
-        title: 'Meus Jogos',
-        subtitle: 'Voltar para a biblioteca',
-        icon: 'bi bi-controller'
-    }), createBrowserChoiceOption({
-        id: 'continue',
-        type: 'continue',
-        title: 'Continuar na pagina atual',
-        subtitle: currentBrowserUrl || 'Navegador aberto',
-        icon: 'bi bi-window-check'
-    }, true));
+    browserChoiceList.append(
+        createBrowserChoiceOption({
+            id: 'games',
+            type: 'games',
+            title: 'Meus Jogos',
+            subtitle: 'Voltar para a biblioteca',
+            icon: 'bi bi-controller'
+        }),
+        createBrowserChoiceOption({
+            id: 'continue',
+            type: 'continue',
+            title: 'Continuar na pagina atual',
+            subtitle: currentBrowserUrl || 'Navegador aberto',
+            icon: 'bi bi-window-check'
+        }, true)
+    );
     browserChoiceModal.show();
 }
+
 function openBrowserCloseModal() {
     ensureBrowserChoiceModal();
     loadBrowserPageTabs();
@@ -441,6 +487,7 @@ function openBrowserCloseModal() {
     browserChoiceTitle.textContent = 'Qual pagina deseja fechar?';
     browserChoiceConfirm.querySelector('span:last-child').textContent = 'Fechar';
     browserChoiceList.innerHTML = '';
+
     if (!browserPageTabs.length) {
         const empty = createBrowserChoiceOption({
             id: '',
@@ -451,8 +498,7 @@ function openBrowserCloseModal() {
         }, true);
         empty.disabled = true;
         browserChoiceList.appendChild(empty);
-    }
-    else {
+    } else {
         browserPageTabs.forEach((tab, index) => {
             browserChoiceList.appendChild(createBrowserChoiceOption({
                 id: tab.id,
@@ -463,13 +509,16 @@ function openBrowserCloseModal() {
             }, index === 0));
         });
     }
+
     browserChoiceModal.show();
 }
+
 function confirmBrowserChoice() {
     const selected = getBrowserChoiceOptions()[selectedBrowserChoiceIndex];
     if (!selected) {
         return;
     }
+
     if (browserChoiceMode === 'start') {
         const type = selected.dataset.type;
         hideBrowserChoiceModal();
@@ -478,52 +527,64 @@ function confirmBrowserChoice() {
         }
         return;
     }
+
     if (browserChoiceMode === 'close' && selected.dataset.type === 'tab') {
         const tabId = selected.dataset.id;
         hideBrowserChoiceModal();
         closeBrowserPageTab(tabId);
     }
 }
+
 function sendBrowserInputEvent(inputEvent) {
     if (browserNativeLauncherMode) {
         return false;
     }
+
     const activeFrame = getActiveBrowserFrame();
     if (activeFrame?.sendInputEvent) {
         activeFrame.sendInputEvent(inputEvent);
         return true;
     }
+
     return false;
 }
+
 async function insertBrowserText(text) {
     focusBrowserFrame();
+
     const activeFrame = getActiveBrowserFrame();
     if (!browserNativeLauncherMode && activeFrame?.insertText) {
         await activeFrame.insertText(String(text || ''));
         return true;
     }
+
     if (!browserNativeLauncherMode && activeFrame?.executeJavaScript) {
         await activeFrame.executeJavaScript(`document.execCommand('insertText', false, ${JSON.stringify(text)})`);
         return true;
     }
+
     const response = await window.pywebview?.api?.digitar_texto_sistema?.(text);
     reportBrowserSystemInputIssue(response);
     return Boolean(response?.ok);
 }
+
 function sendBrowserKeyShortcut(keyCode, systemKey = keyCode) {
     if (sendBrowserInputEvent({ type: 'keyDown', keyCode })) {
         sendBrowserInputEvent({ type: 'keyUp', keyCode });
         return;
     }
+
     const responsePromise = window.pywebview?.api?.tecla_sistema?.(systemKey);
     responsePromise?.then((response) => {
         reportBrowserSystemInputIssue(response, false);
     });
 }
+
 function moveBrowserTextCursor(direction) {
     const keyCode = direction === 'left' ? 'Left' : 'Right';
     sendBrowserKeyShortcut(keyCode);
 }
+
 function focusBrowserFrame() {
     try {
         if (browserNativeLauncherMode) {
@@ -534,12 +595,13 @@ function focusBrowserFrame() {
             launcherBrowser?.focus?.({ preventScroll: true });
             return;
         }
+
         getActiveBrowserFrame()?.focus?.();
-    }
-    catch {
+    } catch {
         // Focus can fail while the guest page is still starting up.
     }
 }
+
 function startNativeBrowserFocusGuard() {
     stopNativeBrowserFocusGuard();
     browserNativeFocusGuardTimer = window.setInterval(() => {
@@ -547,17 +609,20 @@ function startNativeBrowserFocusGuard() {
             stopNativeBrowserFocusGuard();
             return;
         }
+
         if (document.activeElement?.tagName === 'WEBVIEW' || !document.hasFocus()) {
             focusBrowserFrame();
         }
     }, 250);
 }
+
 function stopNativeBrowserFocusGuard() {
     if (browserNativeFocusGuardTimer) {
         window.clearInterval(browserNativeFocusGuardTimer);
         browserNativeFocusGuardTimer = null;
     }
 }
+
 function prepareBrowserFrame(url) {
     browserFrame.style.cssText = [
         'position: absolute',
@@ -579,6 +644,7 @@ function prepareBrowserFrame(url) {
         startNativeBrowserFocusGuard();
         return;
     }
+
     stopNativeBrowserFocusGuard();
     const activeFrame = ensureBrowserWebview(url, browserTitle?.textContent || 'Navegador');
     activeFrame.classList.remove('d-none');
@@ -586,19 +652,23 @@ function prepareBrowserFrame(url) {
     activeFrame.style.pointerEvents = '';
     activeFrame.src = url;
 }
+
 async function positionNativeLauncherBrowser() {
     if (!browserNativeLauncherMode || !window.pywebview?.api?.posicionar_url_launcher) {
         return;
     }
+
     const response = await window.pywebview.api.posicionar_url_launcher(getBrowserBounds());
     reportBrowserSystemInputIssue(response, false);
     syncNativeBrowserKeyboard();
 }
+
 async function polishBrowserPage() {
     const activeFrame = getActiveBrowserFrame();
     if (!activeFrame?.insertCSS) {
         return;
     }
+
     try {
         await activeFrame.insertCSS(`
             html,
@@ -608,27 +678,31 @@ async function polishBrowserPage() {
                 background: #0f0f0f !important;
             }
         `);
-    }
-    catch {
+    } catch {
         // Some guest pages reject CSS injection; the host layout still handles sizing.
     }
 }
+
 async function syncSystemMouse() {
     if (!window.pywebview?.api?.mover_mouse_sistema) {
         return;
     }
+
     const response = await window.pywebview.api.mover_mouse_sistema(browserCursorX, browserCursorY);
     reportBrowserSystemInputIssue(response, false);
 }
+
 async function moveBrowserMouse(dx, dy) {
     if (!launcherBrowser || launcherBrowser.classList.contains('d-none') || browserKeyboardOpen) {
         return false;
     }
+
     lastBrowserMouseMoveAt = performance.now();
     browserCursorX += Number(dx) || 0;
     browserCursorY += Number(dy) || 0;
     updateBrowserCursor();
     focusBrowserFrame();
+
     if (!sendBrowserInputEvent({
         type: 'mouseMove',
         x: Math.round(browserCursorX),
@@ -639,32 +713,39 @@ async function moveBrowserMouse(dx, dy) {
         const response = await window.pywebview.api.mover_mouse_relativo_sistema(dx, dy);
         reportBrowserSystemInputIssue(response, false);
     }
+
     return true;
 }
+
 function launcherMouseMove(dx, dy) {
     return moveBrowserMouse(dx, dy);
 }
+
 function reportBrowserSystemInputIssue(response, showAlert = true) {
     if (!response || response.ok !== false) {
         return;
     }
+
     if (showAlert) {
         if (browserSystemInputWarningShown) {
             return;
         }
+
         browserSystemInputWarningShown = true;
         showControllerAlert(response.message);
-    }
-    else {
+    } else {
         if (browserSystemInputLogShown) {
             return;
         }
+
         browserSystemInputLogShown = true;
         console.warn(response.message);
     }
 }
+
 async function clickBrowserCursor(button = 'left') {
     focusBrowserFrame();
+
     if (sendBrowserInputEvent({
         type: 'mouseDown',
         button,
@@ -681,15 +762,19 @@ async function clickBrowserCursor(button = 'left') {
         });
         return;
     }
+
     const apiMethod = button === 'right' ? 'clicar_mouse_direito_sistema' : 'clicar_mouse_sistema';
     if (!window.pywebview?.api?.[apiMethod]) {
         return;
     }
+
     const response = await window.pywebview.api[apiMethod]();
     reportBrowserSystemInputIssue(response);
 }
+
 async function scrollBrowserPage(direction) {
     focusBrowserFrame();
+
     if (sendBrowserInputEvent({
         type: 'mouseWheel',
         x: Math.round(browserCursorX),
@@ -699,25 +784,32 @@ async function scrollBrowserPage(direction) {
     })) {
         return;
     }
+
     if (!window.pywebview?.api?.rolar_mouse_sistema) {
         return;
     }
+
     const response = await window.pywebview.api.rolar_mouse_sistema(direction);
     reportBrowserSystemInputIssue(response);
 }
+
 function getBrowserKeys() {
     return Array.from(browserVirtualKeyboard?.querySelectorAll('.browser-key') || []);
 }
+
 function browserKeyLabel(value) {
     return /^[a-z]$/.test(value) && browserKeyboardShift ? value.toUpperCase() : value;
 }
+
 function buildBrowserKeyboard() {
     if (!browserVirtualKeyboard || browserVirtualKeyboard.dataset.ready === '1') {
         return;
     }
+
     browserKeyboardLayout.forEach((row, rowIndex) => {
         const rowElement = document.createElement('div');
         rowElement.className = 'browser-keyboard-row';
+
         row.forEach((entry, columnIndex) => {
             const key = typeof entry === 'string' ? { label: entry, text: entry } : entry;
             const button = document.createElement('button');
@@ -726,121 +818,132 @@ function buildBrowserKeyboard() {
             button.textContent = key.label;
             button.dataset.row = String(rowIndex);
             button.dataset.column = String(columnIndex);
-            if (key.text)
-                button.dataset.text = key.text;
-            if (key.key)
-                button.dataset.key = key.key;
-            if (key.action)
-                button.dataset.action = key.action;
+            if (key.text) button.dataset.text = key.text;
+            if (key.key) button.dataset.key = key.key;
+            if (key.action) button.dataset.action = key.action;
             button.addEventListener('click', () => pressBrowserKey(button));
             rowElement.appendChild(button);
         });
+
         browserVirtualKeyboard.appendChild(rowElement);
     });
+
     browserVirtualKeyboard.dataset.ready = '1';
 }
+
 function updateBrowserKeyboardSelection() {
     const keys = getBrowserKeys();
-    if (!keys.length)
-        return;
+    if (!keys.length) return;
     selectedBrowserKeyIndex = Math.max(0, Math.min(keys.length - 1, selectedBrowserKeyIndex));
     keys.forEach((key, index) => key.classList.toggle('is-controller-selected', index === selectedBrowserKeyIndex));
     keys[selectedBrowserKeyIndex].focus({ preventScroll: true });
     syncNativeBrowserKeyboard();
 }
+
 function getBrowserKeyboardState() {
     buildBrowserKeyboard();
     const rows = browserKeyboardLayout.map((row, rowIndex) => row.map((entry, columnIndex) => {
         const key = typeof entry === 'string' ? { label: browserKeyLabel(entry), text: entry } : entry;
-        const domKey = getBrowserKeys().find((item) => Number(item.dataset.row) === rowIndex && Number(item.dataset.column) === columnIndex);
+        const domKey = getBrowserKeys().find((item) =>
+            Number(item.dataset.row) === rowIndex && Number(item.dataset.column) === columnIndex
+        );
+
         return {
             label: domKey?.textContent || key.label || key.text || '',
             wide: Boolean(key.wide),
             selected: domKey ? getBrowserKeys().indexOf(domKey) === selectedBrowserKeyIndex : false
         };
     }));
+
     return {
         text: browserKeyboardPreviewText,
         rows
     };
 }
+
 function syncNativeBrowserKeyboard() {
     if (!browserKeyboardOpen || !browserNativeLauncherMode) {
         return;
     }
+
     window.pywebview?.api?.atualizar_teclado_virtual?.(getBrowserKeyboardState(), getBrowserBounds())
         ?.then((response) => reportBrowserSystemInputIssue(response, false));
 }
+
 async function getActiveLauncherTabId() {
     const response = await window.pywebview?.api?.listar_url_launcher?.();
     if (response?.ok === false) {
         reportBrowserSystemInputIssue(response, false);
         return '';
     }
+
     return (response?.tabs || []).find((tab) => tab.active)?.id || '';
 }
+
 async function hideNativeBrowserForControllerModal() {
     if (!browserNativeLauncherMode || !window.pywebview?.api?.ocultar_url_launcher) {
         hiddenTabForControllerModal = '';
         return;
     }
+
     hiddenTabForControllerModal = await getActiveLauncherTabId();
     const response = await window.pywebview.api.ocultar_url_launcher();
     reportBrowserSystemInputIssue(response, false);
 }
+
 async function restoreNativeBrowserAfterControllerModal() {
     const tabId = hiddenTabForControllerModal;
     hiddenTabForControllerModal = '';
+
     if (!tabId || !browserNativeLauncherMode || !window.pywebview?.api?.ativar_url_launcher) {
         return;
     }
+
     const response = await window.pywebview.api.ativar_url_launcher(tabId, getBrowserBounds());
     reportBrowserSystemInputIssue(response, false);
 }
+
 async function openNativeControllerModal(type) {
     toggleBrowserKeyboard(false);
     window.pywebview?.api?.definir_modo_modal_navegador?.(false);
     await hideNativeBrowserForControllerModal();
+
     if (type === 'close') {
         await window.PageTabsModal?.openClose?.();
-    }
-    else {
+    } else {
         await window.PageTabsModal?.openAccess?.();
     }
+
     window.pywebview?.api?.definir_modo_modal_navegador?.(true);
 }
+
 function getBrowserKeyAt(row, column) {
     const rowKeys = getBrowserKeys().filter((key) => Number(key.dataset.row) === row);
-    if (!rowKeys.length)
-        return null;
+    if (!rowKeys.length) return null;
     const wrapped = ((column % rowKeys.length) + rowKeys.length) % rowKeys.length;
     return rowKeys[wrapped];
 }
+
 function moveBrowserKeyboard(direction) {
     const keys = getBrowserKeys();
     const selected = keys[selectedBrowserKeyIndex];
-    if (!selected)
-        return;
+    if (!selected) return;
     const row = Number(selected.dataset.row);
     const column = Number(selected.dataset.column);
     const rows = browserKeyboardLayout.length;
     let next = null;
-    if (direction === 'left')
-        next = getBrowserKeyAt(row, column - 1);
-    if (direction === 'right')
-        next = getBrowserKeyAt(row, column + 1);
-    if (direction === 'up')
-        next = getBrowserKeyAt((row - 1 + rows) % rows, column);
-    if (direction === 'down')
-        next = getBrowserKeyAt((row + 1) % rows, column);
+    if (direction === 'left') next = getBrowserKeyAt(row, column - 1);
+    if (direction === 'right') next = getBrowserKeyAt(row, column + 1);
+    if (direction === 'up') next = getBrowserKeyAt((row - 1 + rows) % rows, column);
+    if (direction === 'down') next = getBrowserKeyAt((row + 1) % rows, column);
     if (next) {
         selectedBrowserKeyIndex = keys.indexOf(next);
         updateBrowserKeyboardSelection();
     }
 }
+
 async function pressBrowserKey(button = getBrowserKeys()[selectedBrowserKeyIndex]) {
-    if (!button)
-        return;
+    if (!button) return;
     const action = button.dataset.action;
     if (action === 'close') {
         toggleBrowserKeyboard(false);
@@ -849,8 +952,7 @@ async function pressBrowserKey(button = getBrowserKeys()[selectedBrowserKeyIndex
     if (action === 'shift') {
         browserKeyboardShift = !browserKeyboardShift;
         getBrowserKeys().forEach((key) => {
-            if (key.dataset.text)
-                key.textContent = browserKeyLabel(key.dataset.text);
+            if (key.dataset.text) key.textContent = browserKeyLabel(key.dataset.text);
         });
         syncNativeBrowserKeyboard();
         return;
@@ -862,6 +964,7 @@ async function pressBrowserKey(button = getBrowserKeys()[selectedBrowserKeyIndex
             syncNativeBrowserKeyboard();
             return;
         }
+
         const keyCode = button.dataset.key === 'Return'
             ? 'Enter'
             : button.dataset.key === 'BackSpace'
@@ -871,8 +974,7 @@ async function pressBrowserKey(button = getBrowserKeys()[selectedBrowserKeyIndex
                     : button.dataset.key;
         if (keyCode === 'Backspace') {
             browserKeyboardPreviewText = browserKeyboardPreviewText.slice(0, -1);
-        }
-        else if (keyCode === 'Enter') {
+        } else if (keyCode === 'Enter') {
             browserKeyboardPreviewText = '';
         }
         if (sendBrowserInputEvent({ type: 'keyDown', keyCode })) {
@@ -880,6 +982,7 @@ async function pressBrowserKey(button = getBrowserKeys()[selectedBrowserKeyIndex
             syncNativeBrowserKeyboard();
             return;
         }
+
         const response = await window.pywebview?.api?.tecla_sistema?.(button.dataset.key);
         reportBrowserSystemInputIssue(response);
         syncNativeBrowserKeyboard();
@@ -892,6 +995,7 @@ async function pressBrowserKey(button = getBrowserKeys()[selectedBrowserKeyIndex
         syncNativeBrowserKeyboard();
     }
 }
+
 function toggleBrowserKeyboard(force = null) {
     buildBrowserKeyboard();
     browserKeyboardOpen = force === null ? !browserKeyboardOpen : Boolean(force);
@@ -904,27 +1008,29 @@ function toggleBrowserKeyboard(force = null) {
             window.pywebview?.api?.mostrar_teclado_virtual?.(getBrowserKeyboardState(), getBrowserBounds())
                 ?.then((response) => reportBrowserSystemInputIssue(response, false));
         }
-    }
-    else {
+    } else {
         window.pywebview?.api?.fechar_teclado_virtual?.()
             ?.then((response) => reportBrowserSystemInputIssue(response, false));
     }
 }
+
 async function openStoreUrl(url, title = 'Navegador', openMode = 'internal') {
     if (!url) {
         return;
     }
+
     openMode = window.BrowserControlMode?.resolveBrowserOpenMode?.(url, openMode) || openMode;
+
     if (openMode === 'system') {
         const response = await window.pywebview?.api?.abrir_url_sistema?.(url);
         if (response && response.ok === false) {
             showControllerAlert(response.message);
-        }
-        else if (!response) {
+        } else if (!response) {
             window.open(url, '_blank');
         }
         return;
     }
+
     currentBrowserUrl = url;
     addBrowserPageTab(url, title);
     browserSystemInputLogShown = false;
@@ -947,32 +1053,37 @@ async function openStoreUrl(url, title = 'Navegador', openMode = 'internal') {
     browserCursorY = 0;
     updateBrowserCursor();
     prepareBrowserFrame(url);
+
     if (browserNativeLauncherMode) {
         const response = await window.pywebview.api.abrir_url_launcher(url, title, getBrowserBounds());
         reportBrowserSystemInputIssue(response);
-    }
-    else {
+    } else {
         browserFrame.addEventListener('dom-ready', () => {
             polishBrowserPage();
             focusBrowserFrame();
         }, { once: true });
     }
+
     updateBrowserSelection();
 }
+
 async function activateStoreTab(tabId) {
     if (!tabId || !window.pywebview?.api?.listar_url_launcher) {
         return false;
     }
+
     const response = await window.pywebview.api.listar_url_launcher();
     if (response?.ok === false) {
         reportBrowserSystemInputIssue(response);
         return false;
     }
+
     const tab = (response.tabs || []).find((item) => item.id === tabId);
     if (!tab?.url) {
         showControllerAlert('Pagina aberta nao encontrada.');
         return false;
     }
+
     currentBrowserUrl = tab.url;
     addBrowserPageTab(tab.url, tab.title || 'Navegador');
     browserSystemInputLogShown = false;
@@ -995,32 +1106,42 @@ async function activateStoreTab(tabId) {
     browserCursorY = 0;
     updateBrowserCursor();
     prepareBrowserFrame(tab.url);
+
     const activateResponse = await window.pywebview?.api?.ativar_url_launcher?.(tab.id, getBrowserBounds());
     reportBrowserSystemInputIssue(activateResponse);
     if (activateResponse?.ok === false) {
         return false;
     }
+
     if (activateResponse?.tab?.url) {
         currentBrowserUrl = activateResponse.tab.url;
     }
     updateBrowserSelection();
     return true;
 }
+
 async function registerOpenPageBeforeLeaving() {
     if (browserNativeLauncherMode) {
         return;
     }
+
     const activeUrl = getActiveBrowserFrame()?.getURL?.() || currentBrowserUrl;
     if (!activeUrl || activeUrl === 'about:blank' || !window.pywebview?.api?.registrar_url_launcher) {
         return;
     }
-    const response = await window.pywebview.api.registrar_url_launcher(activeUrl, browserTitle?.textContent || 'Navegador');
+
+    const response = await window.pywebview.api.registrar_url_launcher(
+        activeUrl,
+        browserTitle?.textContent || 'Navegador'
+    );
     reportBrowserSystemInputIssue(response, false);
 }
+
 async function closeStoreBrowser() {
     if (!launcherBrowser || launcherBrowser.classList.contains('d-none')) {
         return false;
     }
+
     await registerOpenPageBeforeLeaving();
     getActiveBrowserFrame()?.classList.add('d-none');
     window.pywebview?.api?.ocultar_url_launcher?.();
@@ -1036,6 +1157,7 @@ async function closeStoreBrowser() {
     window.location.href = './index.html';
     return true;
 }
+
 function returnToGames() {
     closeStoreBrowser().then((closed) => {
         if (!closed) {
@@ -1043,18 +1165,18 @@ function returnToGames() {
         }
     });
 }
+
 function reloadStoreBrowser() {
     const activeFrame = getActiveBrowserFrame();
     if (browserNativeLauncherMode && window.pywebview?.api?.recarregar_url_launcher) {
         window.pywebview.api.recarregar_url_launcher().then((response) => reportBrowserSystemInputIssue(response, false));
-    }
-    else if (activeFrame?.reload) {
+    } else if (activeFrame?.reload) {
         activeFrame.reload();
-    }
-    else if (currentBrowserUrl) {
+    } else if (currentBrowserUrl) {
         activeFrame.src = currentBrowserUrl;
     }
 }
+
 async function browserBackAction() {
     if (browserNativeLauncherMode && window.pywebview?.api?.voltar_url_launcher) {
         const response = await window.pywebview.api.voltar_url_launcher();
@@ -1064,33 +1186,41 @@ async function browserBackAction() {
         }
         return true;
     }
+
     const activeFrame = getActiveBrowserFrame();
     if (activeFrame?.canGoBack?.()) {
         activeFrame.goBack();
         return true;
     }
+
     return closeStoreBrowser();
 }
+
 filterButtons.forEach((button) => {
     button.addEventListener('click', () => {
         filterButtons.forEach((item) => item.classList.remove('active'));
         button.classList.add('active');
+
         const filter = button.dataset.filter;
         storeItems.forEach((card) => {
             const show = filter === 'all' || card.dataset.tag === filter;
             card.classList.toggle('d-none', !show);
         });
+
         selectedStoreIndex = 0;
         selectedFilterIndex = Math.max(0, Array.from(filterButtons).indexOf(button));
         setNavigationArea('store', selectedStoreIndex);
     });
 });
+
 function getStoreCards() {
     return Array.from(document.querySelectorAll('.store-item:not(.d-none) .store-card'));
 }
+
 function getNavbarItems() {
     return Array.from(document.querySelectorAll('.navbar-toggler, .navbar-brand, #themeToggle, .app-action-btn'));
 }
+
 function getSidebarItems() {
     return [
         ...document.querySelectorAll('#sidebar .nav-link'),
@@ -1098,74 +1228,80 @@ function getSidebarItems() {
         ...document.querySelectorAll('#sidebar .dropdown-menu.show .dropdown-item')
     ];
 }
+
 function isSidebarOpen() {
     return sidebarElement?.classList.contains('show');
 }
+
 function clearNavigationSelection() {
     document.querySelectorAll('.is-selected, .is-controller-selected').forEach((item) => {
         item.classList.remove('is-selected', 'is-controller-selected');
         item.setAttribute('tabindex', '-1');
     });
 }
+
 function setNavigationArea(area, index = null, scrollIntoView = true) {
     navigationArea = area;
+
     if (area === 'navbar' && index !== null) {
         selectedNavbarIndex = index;
-    }
-    else if (area === 'sidebar' && index !== null) {
+    } else if (area === 'sidebar' && index !== null) {
         selectedSidebarIndex = index;
-    }
-    else if (area === 'filters' && index !== null) {
+    } else if (area === 'filters' && index !== null) {
         selectedFilterIndex = index;
-    }
-    else if (area === 'store' && index !== null) {
+    } else if (area === 'store' && index !== null) {
         selectedStoreIndex = index;
     }
+
     updateNavigationSelection(scrollIntoView);
 }
+
 function updateNavigationSelection(scrollIntoView = true) {
     clearNavigationSelection();
+
     let items = [];
     let selectedIndex = 0;
+
     if (navigationArea === 'navbar') {
         items = getNavbarItems();
         selectedNavbarIndex = Math.max(0, Math.min(items.length - 1, selectedNavbarIndex));
         selectedIndex = selectedNavbarIndex;
-    }
-    else if (navigationArea === 'sidebar' && isSidebarOpen()) {
+    } else if (navigationArea === 'sidebar' && isSidebarOpen()) {
         items = getSidebarItems();
         selectedSidebarIndex = Math.max(0, Math.min(items.length - 1, selectedSidebarIndex));
         selectedIndex = selectedSidebarIndex;
-    }
-    else if (navigationArea === 'filters') {
+    } else if (navigationArea === 'filters') {
         items = Array.from(filterButtons);
+
         if (!items.length) {
             navigationArea = 'store';
             items = getStoreCards();
             selectedStoreIndex = Math.max(0, Math.min(items.length - 1, selectedStoreIndex));
             selectedIndex = selectedStoreIndex;
-        }
-        else {
+        } else {
             selectedFilterIndex = Math.max(0, Math.min(items.length - 1, selectedFilterIndex));
             selectedIndex = selectedFilterIndex;
         }
-    }
-    else {
+    } else {
         navigationArea = 'store';
         items = getStoreCards();
         selectedStoreIndex = Math.max(0, Math.min(items.length - 1, selectedStoreIndex));
         selectedIndex = selectedStoreIndex;
     }
+
     const selectedItem = items[selectedIndex];
+
     items.forEach((item, index) => {
         const isSelected = index === selectedIndex;
         const selectionClass = item.classList.contains('store-card') ? 'is-selected' : 'is-controller-selected';
         item.classList.toggle(selectionClass, isSelected);
         item.setAttribute('tabindex', isSelected ? '0' : '-1');
     });
+
     if (selectedItem) {
         selectedItem.focus({ preventScroll: true });
     }
+
     if (scrollIntoView && selectedItem) {
         selectedItem.scrollIntoView({
             behavior: 'smooth',
@@ -1174,168 +1310,190 @@ function updateNavigationSelection(scrollIntoView = true) {
         });
     }
 }
+
 function launcherNavigate(direction) {
     if (window.isControllerAlertOpen?.()) {
         return;
     }
+
     if (window.PageTabsModal?.isOpen?.()) {
         window.PageTabsModal.navigate(direction);
         return;
     }
+
     if (isBrowserChoiceModalOpen()) {
         navigateBrowserChoice(direction);
         return;
     }
+
     if (launcherBrowser && !launcherBrowser.classList.contains('d-none')) {
         if (browserKeyboardOpen) {
             moveBrowserKeyboard(direction);
             return;
         }
+
         if (performance.now() - lastBrowserMouseMoveAt < 80) {
             return;
         }
+
         const speed = 14;
         const dx = direction === 'left' ? -speed : direction === 'right' ? speed : 0;
         const dy = direction === 'up' ? -speed : direction === 'down' ? speed : 0;
         moveBrowserMouse(dx, dy);
         return;
     }
+
     if (isSidebarOpen()) {
         const sidebarItems = getSidebarItems();
         if (!sidebarItems.length) {
             return;
         }
+
         if (navigationArea !== 'sidebar') {
             setNavigationArea('sidebar', 0);
             return;
         }
+
         if (direction === 'up') {
             selectedSidebarIndex -= 1;
-        }
-        else if (direction === 'down') {
+        } else if (direction === 'down') {
             selectedSidebarIndex += 1;
-        }
-        else if (direction === 'right') {
+        } else if (direction === 'right') {
             sidebar?.hide();
             setNavigationArea('store', selectedStoreIndex);
             return;
         }
+
         selectedSidebarIndex = Math.max(0, Math.min(sidebarItems.length - 1, selectedSidebarIndex));
         updateNavigationSelection();
         return;
     }
+
     if (navigationArea === 'navbar') {
         const navbarItems = getNavbarItems();
         if (!navbarItems.length) {
             return;
         }
+
         if (direction === 'left') {
             selectedNavbarIndex -= 1;
-        }
-        else if (direction === 'right') {
+        } else if (direction === 'right') {
             selectedNavbarIndex += 1;
-        }
-        else if (direction === 'down') {
+        } else if (direction === 'down') {
             if (filterButtons.length) {
                 setNavigationArea('filters', selectedFilterIndex);
-            }
-            else {
+            } else {
                 setNavigationArea('store', selectedStoreIndex);
             }
             return;
         }
+
         selectedNavbarIndex = Math.max(0, Math.min(navbarItems.length - 1, selectedNavbarIndex));
         updateNavigationSelection();
         return;
     }
+
     if (navigationArea === 'filters') {
         const filters = Array.from(filterButtons);
         if (!filters.length) {
             return;
         }
+
         if (direction === 'left') {
             selectedFilterIndex -= 1;
-        }
-        else if (direction === 'right') {
+        } else if (direction === 'right') {
             selectedFilterIndex += 1;
-        }
-        else if (direction === 'up') {
+        } else if (direction === 'up') {
             setNavigationArea('navbar', selectedNavbarIndex);
             return;
-        }
-        else if (direction === 'down') {
+        } else if (direction === 'down') {
             setNavigationArea('store', selectedStoreIndex);
             return;
         }
+
         selectedFilterIndex = Math.max(0, Math.min(filters.length - 1, selectedFilterIndex));
         updateNavigationSelection();
         return;
     }
+
     const cards = getStoreCards();
     if (!cards.length) {
         return;
     }
+
     const currentCard = cards[selectedStoreIndex] || cards[0];
     const currentTop = currentCard.getBoundingClientRect().top;
     const columns = cards.filter((card) => Math.abs(card.getBoundingClientRect().top - currentTop) < 8).length || 1;
+
     if (direction === 'up' && selectedStoreIndex - columns < 0) {
         if (filterButtons.length) {
             setNavigationArea('filters', selectedFilterIndex);
-        }
-        else {
+        } else {
             setNavigationArea('navbar', selectedNavbarIndex);
         }
         return;
     }
+
     if (direction === 'left') {
         selectedStoreIndex -= 1;
-    }
-    else if (direction === 'right') {
+    } else if (direction === 'right') {
         selectedStoreIndex += 1;
-    }
-    else if (direction === 'up') {
+    } else if (direction === 'up') {
         selectedStoreIndex -= columns;
-    }
-    else if (direction === 'down') {
+    } else if (direction === 'down') {
         selectedStoreIndex += columns;
     }
+
     selectedStoreIndex = Math.max(0, Math.min(cards.length - 1, selectedStoreIndex));
     updateNavigationSelection();
 }
+
 function launcherActivate() {
     if (window.handleControllerAlertAction?.('confirm')) {
         return;
     }
+
     if (navigationArea === 'navbar') {
         const navbarItems = getNavbarItems();
         navbarItems[selectedNavbarIndex]?.click();
         return;
     }
+
     if (navigationArea === 'sidebar' && isSidebarOpen()) {
         const sidebarItems = getSidebarItems();
         sidebarItems[selectedSidebarIndex]?.click();
         return;
     }
+
     if (navigationArea === 'filters') {
         const filters = Array.from(filterButtons);
         filters[selectedFilterIndex]?.click();
         return;
     }
+
     const cards = getStoreCards();
     const selectedCard = cards[selectedStoreIndex];
     if (!selectedCard) {
         return;
     }
+
     const button = selectedCard.querySelector('button');
-    openStoreUrl(selectedCard.dataset.url || button?.dataset.url, selectedCard.dataset.title || button?.dataset.title || selectedCard.querySelector('h3')?.textContent || 'Navegador', selectedCard.dataset.openMode || button?.dataset.openMode || 'internal');
+    openStoreUrl(
+        selectedCard.dataset.url || button?.dataset.url,
+        selectedCard.dataset.title || button?.dataset.title || selectedCard.querySelector('h3')?.textContent || 'Navegador',
+        selectedCard.dataset.openMode || button?.dataset.openMode || 'internal'
+    );
 }
+
 function launcherBack() {
     if (window.handleControllerAlertAction?.('back')) {
         return;
     }
+
     if (window.PageTabsModal?.handleAction?.('back')) {
         return;
     }
+
     if (hiddenTabForControllerModal) {
         window.pywebview?.api?.definir_modo_modal_navegador?.(false);
         restoreNativeBrowserAfterControllerModal().catch((error) => {
@@ -1343,101 +1501,108 @@ function launcherBack() {
         });
         return;
     }
+
     if (isBrowserChoiceModalOpen()) {
         hideBrowserChoiceModal();
         return;
     }
+
     if (browserKeyboardOpen) {
         toggleBrowserKeyboard(false);
         return;
     }
+
     if (launcherBrowser && !launcherBrowser.classList.contains('d-none')) {
         browserBackAction();
         return;
     }
+
     if (isSidebarOpen()) {
         sidebar?.hide();
         setNavigationArea('store', selectedStoreIndex);
     }
 }
+
 function launcherToggleTheme() {
     const currentTheme = document.documentElement.dataset.theme || 'dark';
     applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
 }
+
 function launcherModalAction() {
     if (window.handleControllerAlertAction?.('confirm')) {
         return true;
     }
+
     if (window.PageTabsModal?.handleAction?.('confirm')) {
         return true;
     }
+
     if (isBrowserChoiceModalOpen()) {
         confirmBrowserChoice();
         return true;
     }
+
     if (launcherBrowser && !launcherBrowser.classList.contains('d-none')) {
         if (browserKeyboardOpen) {
             pressBrowserKey();
             return true;
         }
+
         clickBrowserCursor();
         return true;
     }
+
     return false;
 }
+
 function launcherKeyboardShortcut(action) {
     if (!launcherBrowser || launcherBrowser.classList.contains('d-none')) {
         return false;
     }
+
     if (action === 'backspace') {
         if (!browserKeyboardOpen) {
             toggleBrowserKeyboard(true);
-        }
-        else {
+        } else {
             sendBrowserKeyShortcut('Backspace', 'BackSpace');
         }
-    }
-    else if (action === 'field') {
+    } else if (action === 'field') {
         toggleBrowserKeyboard();
-    }
-    else if (action === 'shift') {
+    } else if (action === 'shift') {
         reloadStoreBrowser();
-    }
-    else if (action === 'save') {
+    } else if (action === 'save') {
         sendBrowserKeyShortcut('Enter', 'Return');
-    }
-    else if (action === 'cursorLeft') {
+    } else if (action === 'cursorLeft') {
         moveBrowserTextCursor('left');
-    }
-    else if (action === 'cursorRight') {
+    } else if (action === 'cursorRight') {
         moveBrowserTextCursor('right');
-    }
-    else if (action === 'mouseLeftClick') {
+    } else if (action === 'mouseLeftClick') {
         clickBrowserCursor('left');
-    }
-    else if (action === 'mouseRightClick') {
+    } else if (action === 'mouseRightClick') {
         clickBrowserCursor('right');
-    }
-    else if (action === 'scrollUp') {
+    } else if (action === 'scrollUp') {
         scrollBrowserPage('up');
-    }
-    else if (action === 'scrollDown') {
+    } else if (action === 'scrollDown') {
         scrollBrowserPage('down');
-    }
-    else {
+    } else {
         return false;
     }
+
     return true;
 }
+
 sidebarElement?.addEventListener('shown.bs.offcanvas', () => {
     setNavigationArea('sidebar', selectedSidebarIndex, false);
 });
+
 sidebarElement?.addEventListener('hidden.bs.offcanvas', () => {
     if (navigationArea === 'sidebar') {
         setNavigationArea('store', selectedStoreIndex, false);
     }
 });
+
 updateNavigationSelection(false);
+
 // Sync mouse interaction with controller navigation state.
 Array.from(filterButtons).forEach((button, index) => {
     button.addEventListener('mouseenter', () => {
@@ -1445,110 +1610,96 @@ Array.from(filterButtons).forEach((button, index) => {
         setNavigationArea('filters', selectedFilterIndex, false);
     });
 });
+
 getStoreCards().forEach((card, index) => {
     card.addEventListener('mouseenter', () => {
         selectedStoreIndex = index;
         setNavigationArea('store', selectedStoreIndex, false);
     });
 });
+
 document.getElementById('storeGrid')?.addEventListener('click', (event) => {
     const card = event.target.closest('.store-card');
     if (!card) {
         return;
     }
+
     const cards = getStoreCards();
     const index = cards.indexOf(card);
     if (index >= 0) {
         selectedStoreIndex = index;
         setNavigationArea('store', selectedStoreIndex, false);
     }
+
     const button = event.target.closest('button');
     const url = button?.dataset.url || card.dataset.url;
     const title = button?.dataset.title || card.dataset.title || card.querySelector('h3')?.textContent || 'Navegador';
     const openMode = button?.dataset.openMode || card.dataset.openMode || 'internal';
     openStoreUrl(url, title, openMode);
 });
+
 browserBack?.addEventListener('click', browserBackAction);
 browserReload?.addEventListener('click', reloadStoreBrowser);
+
 window.launcherAPI?.onReturnToGames?.(returnToGames);
 window.launcherAPI?.onNativeBrowserControllerAction?.(async (action, payload = {}) => {
     window.markNativeGamepadInput?.();
+
     if (action === 'keyboard-open') {
         toggleBrowserKeyboard(true);
-    }
-    else if (action === 'keyboard-navigate') {
-        if (!browserKeyboardOpen)
-            toggleBrowserKeyboard(true);
+    } else if (action === 'keyboard-navigate') {
+        if (!browserKeyboardOpen) toggleBrowserKeyboard(true);
         moveBrowserKeyboard(payload.direction);
-    }
-    else if (action === 'keyboard-press') {
-        if (!browserKeyboardOpen)
-            toggleBrowserKeyboard(true);
+    } else if (action === 'keyboard-press') {
+        if (!browserKeyboardOpen) toggleBrowserKeyboard(true);
         pressBrowserKey();
-    }
-    else if (action === 'keyboard-backspace') {
-        if (!browserKeyboardOpen)
-            toggleBrowserKeyboard(true);
+    } else if (action === 'keyboard-backspace') {
+        if (!browserKeyboardOpen) toggleBrowserKeyboard(true);
         pressBrowserKey(getBrowserKeys().find((key) => key.dataset.key === 'BackSpace'));
-    }
-    else if (action === 'keyboard-shift') {
-        if (!browserKeyboardOpen)
-            toggleBrowserKeyboard(true);
+    } else if (action === 'keyboard-shift') {
+        if (!browserKeyboardOpen) toggleBrowserKeyboard(true);
         pressBrowserKey(getBrowserKeys().find((key) => key.dataset.action === 'shift'));
-    }
-    else if (action === 'keyboard-cursor-left') {
-        if (!browserKeyboardOpen)
-            toggleBrowserKeyboard(true);
+    } else if (action === 'keyboard-cursor-left') {
+        if (!browserKeyboardOpen) toggleBrowserKeyboard(true);
         moveBrowserTextCursor('left');
-    }
-    else if (action === 'keyboard-cursor-right') {
-        if (!browserKeyboardOpen)
-            toggleBrowserKeyboard(true);
+    } else if (action === 'keyboard-cursor-right') {
+        if (!browserKeyboardOpen) toggleBrowserKeyboard(true);
         moveBrowserTextCursor('right');
-    }
-    else if (action === 'keyboard-close') {
+    } else if (action === 'keyboard-close') {
         toggleBrowserKeyboard(false);
-    }
-    else if (action === 'modal-navigate') {
+    } else if (action === 'modal-navigate') {
         window.PageTabsModal?.navigate?.(payload.direction);
-    }
-    else if (action === 'modal-confirm') {
+    } else if (action === 'modal-confirm') {
         window.PageTabsModal?.handleAction?.('confirm');
         hiddenTabForControllerModal = '';
         window.pywebview?.api?.definir_modo_modal_navegador?.(false);
-    }
-    else if (action === 'modal-back') {
+    } else if (action === 'modal-back') {
         window.PageTabsModal?.handleAction?.('back');
         window.pywebview?.api?.definir_modo_modal_navegador?.(false);
         await restoreNativeBrowserAfterControllerModal();
-    }
-    else if (action === 'reload') {
+    } else if (action === 'reload') {
         reloadStoreBrowser();
-    }
-    else if (action === 'back') {
+    } else if (action === 'back') {
         launcherBack();
-    }
-    else if (action === 'access-modal') {
+    } else if (action === 'access-modal') {
         try {
             await openNativeControllerModal('access');
-        }
-        catch (error) {
+        } catch (error) {
             window.pywebview?.api?.definir_modo_modal_navegador?.(false);
             await restoreNativeBrowserAfterControllerModal();
             showControllerAlert(`Erro ao abrir modal: ${error}`);
         }
-    }
-    else if (action === 'close-modal') {
+    } else if (action === 'close-modal') {
         try {
             await openNativeControllerModal('close');
-        }
-        catch (error) {
+        } catch (error) {
             window.pywebview?.api?.definir_modo_modal_navegador?.(false);
             await restoreNativeBrowserAfterControllerModal();
             showControllerAlert(`Erro ao abrir modal: ${error}`);
         }
     }
 });
+
 const initialBrowserTabId = new URLSearchParams(window.location.search).get('tab')
     || sessionStorage.getItem('launcher-open-tab-id');
 if (initialBrowserTabId) {
@@ -1559,23 +1710,31 @@ if (initialBrowserTabId) {
         });
     }, 120);
 }
+
 document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') {
         return;
     }
+
     event.preventDefault();
     returnToGames();
 }, true);
+
 setupBrowserFrameEvents(browserFrame);
+
 window.addEventListener('resize', positionNativeLauncherBrowser);
+
 let htmlGamepadStarted = false;
 let lastNativeGamepadInputAt = 0;
+
 window.markNativeGamepadInput = function markNativeGamepadInput() {
     lastNativeGamepadInputAt = performance.now();
 };
+
 function readGamepadDirection(gamepad) {
     const axisX = gamepad.axes[0] || 0;
     const axisY = gamepad.axes[1] || 0;
+
     if (gamepad.buttons[12]?.pressed || axisY < -0.65) {
         return 'up';
     }
@@ -1588,56 +1747,70 @@ function readGamepadDirection(gamepad) {
     if (gamepad.buttons[15]?.pressed || axisX > 0.65) {
         return 'right';
     }
+
     return null;
 }
+
 function startHtmlGamepadControl() {
     let previousButtons = [];
     let previousDirection = null;
     let lastMove = 0;
+
     function pressedOnce(gamepad, index) {
         const pressed = Boolean(gamepad.buttons[index]?.pressed);
         const wasPressed = Boolean(previousButtons[index]);
         return pressed && !wasPressed;
     }
+
     function loop() {
         const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
         const gamepad = Array.from(gamepads).find(Boolean);
+
         if (gamepad) {
             const direction = readGamepadDirection(gamepad);
             const now = performance.now();
+
             if (now - lastNativeGamepadInputAt < 700) {
                 previousDirection = direction;
                 previousButtons = gamepad.buttons.map((button) => button.pressed);
                 requestAnimationFrame(loop);
                 return;
             }
+
             const browserOpen = launcherBrowser && !launcherBrowser.classList.contains('d-none');
+
             if (isBrowserChoiceModalOpen()) {
                 if (direction && (direction !== previousDirection || now - lastMove > 180)) {
                     navigateBrowserChoice(direction);
                     lastMove = now;
                 }
+
                 if (pressedOnce(gamepad, 0)) {
                     confirmBrowserChoice();
                 }
+
                 if (pressedOnce(gamepad, 1)) {
                     hideBrowserChoiceModal();
                 }
+
                 previousDirection = direction;
                 previousButtons = gamepad.buttons.map((button) => button.pressed);
                 requestAnimationFrame(loop);
                 return;
             }
+
             if (window.PageTabsModal?.isOpen?.()) {
                 if (direction && (direction !== previousDirection || now - lastMove > 180)) {
                     window.PageTabsModal.navigate(direction);
                     lastMove = now;
                 }
+
                 if (pressedOnce(gamepad, 0)) {
                     window.PageTabsModal.handleAction('confirm');
                     hiddenTabForControllerModal = '';
                     window.pywebview?.api?.definir_modo_modal_navegador?.(false);
                 }
+
                 if (pressedOnce(gamepad, 1)) {
                     window.PageTabsModal.handleAction('back');
                     window.pywebview?.api?.definir_modo_modal_navegador?.(false);
@@ -1645,44 +1818,53 @@ function startHtmlGamepadControl() {
                         showControllerAlert(`Erro ao restaurar pagina: ${error}`);
                     });
                 }
+
                 previousDirection = direction;
                 previousButtons = gamepad.buttons.map((button) => button.pressed);
                 requestAnimationFrame(loop);
                 return;
             }
+
             if (browserOpen && !browserKeyboardOpen) {
                 const axisX = gamepad.axes[0] || 0;
                 const axisY = gamepad.axes[1] || 0;
                 const rightAxisY = gamepad.axes[3] || 0;
                 const speed = gamepad.buttons[5]?.pressed ? 18 : 9;
+
                 if (Math.abs(axisX) > 0.18 || Math.abs(axisY) > 0.18) {
                     moveBrowserMouse(axisX * speed, axisY * speed);
-                }
-                else if (direction && (direction !== previousDirection || now - lastMove > 35)) {
+                } else if (direction && (direction !== previousDirection || now - lastMove > 35)) {
                     const dx = direction === 'left' ? -speed : direction === 'right' ? speed : 0;
                     const dy = direction === 'up' ? -speed : direction === 'down' ? speed : 0;
                     moveBrowserMouse(dx, dy);
                     lastMove = now;
                 }
+
                 if (pressedOnce(gamepad, 0)) {
                     clickBrowserCursor();
                 }
+
                 if (pressedOnce(gamepad, 6)) {
                     clickBrowserCursor('right');
                 }
+
                 if (pressedOnce(gamepad, 7)) {
                     clickBrowserCursor('left');
                 }
+
                 if (Math.abs(rightAxisY) > 0.35 && now - lastMove > 80) {
                     scrollBrowserPage(rightAxisY > 0 ? 'down' : 'up');
                     lastMove = now;
                 }
+
                 if (pressedOnce(gamepad, 2)) {
                     toggleBrowserKeyboard();
                 }
+
                 if (pressedOnce(gamepad, 3)) {
                     reloadStoreBrowser();
                 }
+
                 if (pressedOnce(gamepad, 9)) {
                     openNativeControllerModal('access').catch((error) => {
                         showControllerAlert(`Erro ao abrir modal: ${error}`);
@@ -1692,6 +1874,7 @@ function startHtmlGamepadControl() {
                     requestAnimationFrame(loop);
                     return;
                 }
+
                 if (pressedOnce(gamepad, 8)) {
                     openNativeControllerModal('close').catch((error) => {
                         showControllerAlert(`Erro ao abrir modal: ${error}`);
@@ -1701,26 +1884,33 @@ function startHtmlGamepadControl() {
                     requestAnimationFrame(loop);
                     return;
                 }
+
                 if (pressedOnce(gamepad, 1)) {
                     launcherBack();
                 }
+
                 previousDirection = direction;
                 previousButtons = gamepad.buttons.map((button) => button.pressed);
                 requestAnimationFrame(loop);
                 return;
             }
+
             if (browserOpen && browserKeyboardOpen && pressedOnce(gamepad, 2)) {
                 toggleBrowserKeyboard(false);
             }
+
             if (browserOpen && browserKeyboardOpen && pressedOnce(gamepad, 4)) {
                 moveBrowserTextCursor('left');
             }
+
             if (browserOpen && browserKeyboardOpen && pressedOnce(gamepad, 5)) {
                 moveBrowserTextCursor('right');
             }
+
             if (browserOpen && browserKeyboardOpen && pressedOnce(gamepad, 3)) {
                 insertBrowserText(' ');
             }
+
             if (browserOpen && browserKeyboardOpen && pressedOnce(gamepad, 8)) {
                 openNativeControllerModal('close').catch((error) => {
                     showControllerAlert(`Erro ao abrir modal: ${error}`);
@@ -1730,6 +1920,7 @@ function startHtmlGamepadControl() {
                 requestAnimationFrame(loop);
                 return;
             }
+
             if (browserOpen && browserKeyboardOpen && pressedOnce(gamepad, 9)) {
                 openNativeControllerModal('access').catch((error) => {
                     showControllerAlert(`Erro ao abrir modal: ${error}`);
@@ -1739,10 +1930,12 @@ function startHtmlGamepadControl() {
                 requestAnimationFrame(loop);
                 return;
             }
+
             if (direction && (direction !== previousDirection || now - lastMove > 240)) {
                 launcherNavigate(direction);
                 lastMove = now;
             }
+
             if (!browserKeyboardOpen && pressedOnce(gamepad, 9)) {
                 openNativeControllerModal('access').catch((error) => {
                     showControllerAlert(`Erro ao abrir modal: ${error}`);
@@ -1752,6 +1945,7 @@ function startHtmlGamepadControl() {
                 requestAnimationFrame(loop);
                 return;
             }
+
             if (!browserKeyboardOpen && pressedOnce(gamepad, 8)) {
                 openNativeControllerModal('close').catch((error) => {
                     showControllerAlert(`Erro ao abrir modal: ${error}`);
@@ -1761,28 +1955,35 @@ function startHtmlGamepadControl() {
                 requestAnimationFrame(loop);
                 return;
             }
+
             if (pressedOnce(gamepad, 0)) {
                 if (!launcherModalAction('confirm')) {
                     launcherActivate();
                 }
             }
+
             if (pressedOnce(gamepad, 1)) {
                 launcherBack();
             }
+
             previousDirection = direction;
             previousButtons = gamepad.buttons.map((button) => button.pressed);
         }
+
         requestAnimationFrame(loop);
     }
+
     requestAnimationFrame(loop);
 }
+
 function maybeStartHtmlGamepadControl() {
     if (htmlGamepadStarted || !('getGamepads' in navigator)) {
         return;
     }
+
     htmlGamepadStarted = true;
     startHtmlGamepadControl();
 }
+
 window.addEventListener('pywebviewready', maybeStartHtmlGamepadControl);
 window.setTimeout(maybeStartHtmlGamepadControl, 1200);
-//# sourceMappingURL=store.js.map
